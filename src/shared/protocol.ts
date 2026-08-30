@@ -206,6 +206,7 @@ export type WebviewToHostMessage =
   | { type: 'log:selectFile'; hash: string; path: string }
   | { type: 'log:contextMenu'; hash: string; x: number; y: number }
   | { type: 'log:contextAction'; hash: string; action: string }
+  | { type: 'commit:request' }
   | { type: 'commit:toggleFile'; path: string; staged: boolean }
   | { type: 'commit:setMessage'; message: string }
   | { type: 'commit:setAmend'; amend: boolean }
