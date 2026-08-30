@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { parseStashList, stashKind } from '../../src/git/stash';
+import { buildStashListArgs, parseStashList, stashKind } from '../../src/git/stash';
 
 const FIELD = '\x1f';
+
+describe('buildStashListArgs', () => {
+  it('never passes --date, which would corrupt %gd into a date-based (unusable) ref', () => {
+    const args = buildStashListArgs();
+    expect(args.some((a) => a.startsWith('--date'))).toBe(false);
+    expect(args.some((a) => a.includes('%gd'))).toBe(true);
+  });
+});
 
 describe('parseStashList', () => {
   it('parses stash entries in order', () => {

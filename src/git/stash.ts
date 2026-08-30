@@ -13,7 +13,11 @@ export interface RawStash {
 }
 
 export function buildStashListArgs(): string[] {
-  return ['stash', 'list', `--format=%gd${FIELD}%s${FIELD}%an${FIELD}%ad`, '--date=iso-strict'];
+  // %gd (the stash's ordinal ref, e.g. "stash@{0}") silently switches to rendering the
+  // reflog *date* instead the moment any `--date=` flag is present on the command, in
+  // which case `applyStash`/`dropStash` are handed an unusable ref. Using %ai instead of
+  // %ad + --date=iso-strict gets an ISO-ish timestamp without ever setting that flag.
+  return ['stash', 'list', `--format=%gd${FIELD}%s${FIELD}%an${FIELD}%ai`];
 }
 
 export function parseStashList(raw: string): RawStash[] {

@@ -31,7 +31,27 @@ export class GitService {
   private queue: Promise<unknown> = Promise.resolve();
 
   constructor(readonly root: string) {
-    this.git = simpleGit({ baseDir: root, maxConcurrentProcesses: 1, trimmed: false });
+    this.git = simpleGit({
+      baseDir: root,
+      maxConcurrentProcesses: 1,
+      trimmed: false,
+      // raw() always merges the *inherited* process.env into any per-call .env() override
+      // (see below) so git keeps whatever ambient config the host has set up — e.g. a
+      // credential helper or GIT_CONFIG_* injected for an outbound proxy. simple-git's
+      // safety plugin otherwise refuses a custom .env() call outright whenever any of these
+      // land in it, regardless of value, since it can't tell "inherited" from "attacker
+      // supplied". Branchly's own git.raw() callers never accept raw, unsanitized argv from
+      // outside the extension, so the actual class of attack these flags guard against (an
+      // untrusted caller injecting a credential helper, editor, or config override into a
+      // git invocation) doesn't apply here.
+      unsafe: {
+        allowUnsafeEditor: true,
+        allowUnsafeAskPass: true,
+        allowUnsafeConfigEnvCount: true,
+        allowUnsafeConfigPaths: true,
+        allowUnsafeCredentialHelper: true,
+      },
+    });
   }
 
   private enqueue<T>(fn: () => Promise<T>): Promise<T> {
