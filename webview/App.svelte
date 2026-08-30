@@ -7,6 +7,7 @@
   import RebaseTab from './tabs/RebaseTab.svelte';
   import ShelfTab from './tabs/ShelfTab.svelte';
   import HistoryTab from './tabs/HistoryTab.svelte';
+  import BranchPopup from './lib/BranchPopup.svelte';
 
   const TABS: { id: TabId; label: string }[] = [
     { id: 'log', label: 'Log' },
@@ -101,6 +102,10 @@
     {/if}
     <div class="spacer"></div>
   </div>
+
+  {#if appState.branchPopupOpen}
+    <BranchPopup />
+  {/if}
 </div>
 
 <style>

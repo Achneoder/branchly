@@ -193,6 +193,7 @@ export type HostToWebviewMessage =
   | { type: 'rebase:todo'; items: RebaseTodoItem[]; base: string }
   | { type: 'rebase:preview'; items: { text: string; color: string }[] }
   | { type: 'branches:list'; branches: BranchItem[] }
+  | { type: 'branches:open' }
   | { type: 'menu:open'; x: number; y: number; items: ContextMenuItem[]; contextHash: string }
   | { type: 'error'; message: string };
 
@@ -235,4 +236,4 @@ export type WebviewToHostMessage =
   | { type: 'branches:request' }
   | { type: 'branches:checkout'; name: string }
   | { type: 'branches:compare'; name: string }
-  | { type: 'branches:newFrom'; base: string; name: string };
+  | { type: 'branches:newFrom'; base: string };

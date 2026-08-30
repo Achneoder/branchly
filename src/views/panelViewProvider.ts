@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import type { Container } from '../core/container';
 import { AbortRegistry } from '../core/abortRegistry';
 import { readAppearance } from '../core/config';
-import type { AppearanceState, WebviewToHostMessage } from '../shared/protocol';
+import type { AppearanceState, TabId, WebviewToHostMessage } from '../shared/protocol';
 import type { PanelContext } from './handlers/types';
 import { getRepoStatus } from './handlers/shared';
 import * as logHandler from './handlers/log';
@@ -80,6 +80,18 @@ export class PanelViewProvider implements vscode.WebviewViewProvider {
     const ctx = this.contextFor(this.view);
     this.pushAppearance(ctx);
     void this.pushStatus(ctx);
+  }
+
+  openBranchPopup(): void {
+    if (!this.view) return;
+    this.view.show?.(true);
+    this.view.webview.postMessage({ type: 'branches:open' });
+  }
+
+  openTab(tab: TabId): void {
+    if (!this.view) return;
+    this.view.show?.(true);
+    this.view.webview.postMessage({ type: 'setTab', tab });
   }
 
   private contextFor(view: vscode.WebviewView): PanelContext {
