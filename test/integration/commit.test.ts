@@ -6,7 +6,7 @@ import {
   type Fixture,
 } from '../fixtures/makeRepo';
 import { GitService } from '../../src/git/gitService';
-import { getStatusEntries, toFileStatus } from '../../src/git/status';
+import { getStatusEntries, getStatusSummary, toFileStatus } from '../../src/git/status';
 
 describe('changelist staging + commit (real repo)', () => {
   let fx: Fixture;
@@ -55,5 +55,15 @@ describe('changelist staging + commit (real repo)', () => {
 
     // undo the extra commit so afterEach's hard reset returns to the shared main tip
     await git.raw(['reset', '--hard', 'HEAD~1']);
+  });
+
+  it('reports an empty branch name (not the literal "HEAD") when detached', async () => {
+    const head = (await git.raw(['rev-parse', 'HEAD'])).trim();
+    await git.raw(['checkout', head]);
+
+    const summary = await getStatusSummary(git);
+    assert.equal(summary.branch, '');
+
+    await git.raw(['checkout', 'main']);
   });
 });

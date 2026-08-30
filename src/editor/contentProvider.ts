@@ -23,7 +23,14 @@ export class GitContentProvider implements vscode.TextDocumentContentProvider {
   constructor(private readonly container: Container) {}
 
   async provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
-    const { root, hash } = JSON.parse(uri.query) as UriPayload;
+    let payload: UriPayload;
+    try {
+      payload = JSON.parse(uri.query) as UriPayload;
+    } catch {
+      return '';
+    }
+    const { root, hash } = payload;
+    if (!root || !hash) return '';
     const relativePath = uri.path.replace(/^\//, '');
     const git = this.container.getGitService(root);
     try {

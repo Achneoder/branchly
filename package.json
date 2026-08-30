@@ -90,61 +90,6 @@
         "category": "Branchly"
       },
       {
-        "command": "branchly.checkoutRevision",
-        "title": "Checkout Revision",
-        "category": "Branchly"
-      },
-      {
-        "command": "branchly.compareWithLocal",
-        "title": "Compare with Local",
-        "category": "Branchly"
-      },
-      {
-        "command": "branchly.showDiffWithWorkingTree",
-        "title": "Show Diff with Working Tree",
-        "category": "Branchly"
-      },
-      {
-        "command": "branchly.cherryPick",
-        "title": "Cherry-Pick into Current Branch",
-        "category": "Branchly"
-      },
-      {
-        "command": "branchly.rebaseFromHere",
-        "title": "Interactively Rebase from Here…",
-        "category": "Branchly"
-      },
-      {
-        "command": "branchly.revertCommit",
-        "title": "Revert Commit",
-        "category": "Branchly"
-      },
-      {
-        "command": "branchly.copyRevisionNumber",
-        "title": "Copy Revision Number",
-        "category": "Branchly"
-      },
-      {
-        "command": "branchly.newBranchFrom",
-        "title": "New Branch from Here…",
-        "category": "Branchly"
-      },
-      {
-        "command": "branchly.checkoutBranch",
-        "title": "Checkout Branch…",
-        "category": "Branchly"
-      },
-      {
-        "command": "branchly.newBranch",
-        "title": "New Branch…",
-        "category": "Branchly"
-      },
-      {
-        "command": "branchly.stashChanges",
-        "title": "Stash Changes…",
-        "category": "Branchly"
-      },
-      {
         "command": "branchly.toggleBlame",
         "title": "Toggle Editor Blame",
         "category": "Branchly"

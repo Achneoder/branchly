@@ -81,8 +81,11 @@ export async function getStatusSummary(
     getStatusEntries(git, signal),
   ]);
   const [ahead = '0', behind = '0'] = counts.trim().split(/\s+/);
+  const trimmedBranch = branch.trim();
   return {
-    branch: branch.trim(),
+    // `rev-parse --abbrev-ref HEAD` returns the literal string "HEAD" in detached state;
+    // normalize to empty so the UI's "detached" fallback actually applies.
+    branch: trimmedBranch === 'HEAD' ? '' : trimmedBranch,
     ahead: Number(ahead) || 0,
     behind: Number(behind) || 0,
     conflictCount: entries.filter((e) => e.kind === 'unmerged').length,
