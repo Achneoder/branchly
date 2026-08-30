@@ -60,6 +60,9 @@ export class PanelViewProvider implements vscode.WebviewViewProvider {
       vscode.workspace.onDidChangeConfiguration((e) => {
         if (e.affectsConfiguration('branchly')) this.pushAppearance(ctx);
       }),
+      vscode.window.onDidChangeActiveTextEditor(
+        (editor) => void historyHandler.pushActiveFile(ctx, editor?.document.uri),
+      ),
     );
 
     webviewView.onDidDispose(() => {
@@ -118,6 +121,7 @@ export class PanelViewProvider implements vscode.WebviewViewProvider {
             appearance: readAppearance(),
             status: await getRepoStatus(ctx),
           });
+          await historyHandler.pushActiveFile(ctx, vscode.window.activeTextEditor?.document.uri);
           return;
         case msg.type === 'setTab':
           return;

@@ -1,8 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'node:path';
-import { getLog, type RawCommit } from '../../git/log';
-import { parseDecoratedRefs } from '../../git/refs';
-import { assignLanes } from '../../graph/lanes';
+import { getLog } from '../../git/log';
 import {
   getCommitFileDiff,
   getCommitFiles,
@@ -13,13 +11,13 @@ import { getLogPageSize } from '../../core/config';
 import { encodeGitUri } from '../../editor/contentProvider';
 import type {
   CommitDetail,
-  CommitRow,
   ContextMenuItem,
   FileChange,
   WebviewToHostMessage,
 } from '../../shared/protocol';
 import type { PanelContext } from './types';
 import { refreshAfterMutation } from './shared';
+import { formatDate, toCommitRows } from './commitRows';
 
 interface ParsedFilters {
   revisionRange?: string;
@@ -43,41 +41,6 @@ function parseFilters(filters: string[]): ParsedFilters {
     else if (key === 'path') result.path = value;
   }
   return result;
-}
-
-function formatDate(iso: string): string {
-  if (!iso) return '';
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
-
-function toCommitRows(raws: RawCommit[]): CommitRow[] {
-  const laneResults = assignLanes(raws.map((c) => ({ hash: c.hash, parents: c.parents })));
-  return raws.map((commit, i) => {
-    const lane = laneResults[i];
-    return {
-      hash: commit.hash,
-      abbrev: commit.hash.slice(0, 7),
-      parents: commit.parents,
-      subject: commit.subject,
-      author: commit.authorName,
-      authorEmail: commit.authorEmail,
-      date: formatDate(commit.authorDate),
-      timestamp: Date.parse(commit.authorDate) || 0,
-      refs: parseDecoratedRefs(commit.refs),
-      isMerge: lane.isMerge,
-      lane: lane.lane,
-      lines: lane.lines,
-      links: lane.links,
-      dots: lane.dots,
-    };
-  });
 }
 
 function buildContextMenu(): ContextMenuItem[] {

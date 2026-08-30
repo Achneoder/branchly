@@ -182,6 +182,7 @@ export type HostToWebviewMessage =
   | { type: 'commit:changelists'; groups: ChangelistGroup[]; amend: boolean; message: string }
   | { type: 'commit:diff'; diff: FileDiff }
   | { type: 'commit:result'; ok: boolean; message?: string }
+  | { type: 'history:activeFile'; path: string | undefined }
   | { type: 'history:entries'; path: string; entries: CommitRow[] }
   | { type: 'history:blame'; path: string; lines: BlameLine[] }
   | { type: 'shelf:list'; entries: StashEntry[] }
