@@ -1,0 +1,63 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+#app {
+  height: 100vh;
+}
+
+.orb ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.orb ::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 6px;
+}
+.orb ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.orb a {
+  color: var(--a1);
+}
+.orb a:hover {
+  color: var(--a4);
+}
+
+.orb button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.orb input,
+.orb textarea {
+  font: inherit;
+  color: var(--fg);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  outline: none;
+}
+
+@keyframes orbpop {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
