@@ -32,6 +32,9 @@ function createAppState() {
       case 'status':
         status = msg.status;
         break;
+      case 'setTab':
+        tab = msg.tab;
+        break;
       case 'error':
         lastError = msg.message;
         break;

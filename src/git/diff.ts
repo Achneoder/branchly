@@ -121,6 +121,29 @@ export async function getCommitFiles(
   return parseNumstat(raw);
 }
 
+/** `--numstat` cannot tell A/M/D apart, so status comes from a second, `--name-status` call. */
+export function parseNameStatus(raw: string): Map<string, FileChange['status']> {
+  const map = new Map<string, FileChange['status']>();
+  for (const line of raw.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    const [code, ...rest] = trimmed.split('\t');
+    const path = rest[rest.length - 1];
+    if (!path) continue;
+    map.set(path, code.charAt(0) as FileChange['status']);
+  }
+  return map;
+}
+
+export async function getCommitFileStatuses(
+  git: GitService,
+  hash: string,
+  signal?: AbortSignal,
+): Promise<Map<string, FileChange['status']>> {
+  const raw = await git.raw(['show', '--name-status', '--format=', hash], signal);
+  return parseNameStatus(raw);
+}
+
 export async function getCommitFileDiff(
   git: GitService,
   hash: string,

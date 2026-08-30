@@ -71,4 +71,11 @@ describe('buildLogArgs', () => {
     expect(args).toContain('main..feature');
     expect(args.slice(-2)).toEqual(['--', 'src']);
   });
+
+  it('adds author/since/until filters when provided', () => {
+    const args = buildLogArgs({ author: 'Ada', since: '2026-01-01', until: '2026-02-01' });
+    expect(args).toContain('--author=Ada');
+    expect(args).toContain('--since=2026-01-01');
+    expect(args).toContain('--until=2026-02-01');
+  });
 });

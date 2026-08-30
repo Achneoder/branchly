@@ -174,6 +174,7 @@ export interface ContextMenuItem {
 export type HostToWebviewMessage =
   | { type: 'init'; appearance: AppearanceState; status: RepoStatusSummary }
   | { type: 'appearance'; appearance: AppearanceState }
+  | { type: 'setTab'; tab: TabId }
   | { type: 'status'; status: RepoStatusSummary }
   | { type: 'log:rows'; rows: CommitRow[]; append: boolean; hasMore: boolean }
   | { type: 'log:detail'; detail: CommitDetail }

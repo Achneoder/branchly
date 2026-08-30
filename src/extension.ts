@@ -3,6 +3,7 @@ import { Container } from './core/container';
 import { PanelViewProvider } from './views/panelViewProvider';
 import { BranchlyStatusBar } from './statusbar/statusBar';
 import { registerCommands } from './commands';
+import { BRANCHLY_SCHEME, GitContentProvider } from './editor/contentProvider';
 
 let container: Container | undefined;
 
@@ -20,6 +21,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   const panel = new PanelViewProvider(container, context.extensionUri);
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(PanelViewProvider.viewType, panel),
+    vscode.workspace.registerTextDocumentContentProvider(
+      BRANCHLY_SCHEME,
+      new GitContentProvider(container),
+    ),
   );
 
   const statusBar = new BranchlyStatusBar(container);
