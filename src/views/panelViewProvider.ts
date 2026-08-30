@@ -55,6 +55,7 @@ export class PanelViewProvider implements vscode.WebviewViewProvider {
       this.container.repositoryManager.onDidChangeRepositoryState(() => {
         void this.pushStatus(ctx);
         void commitHandler.refresh(ctx);
+        void shelfHandler.refresh(ctx);
       }),
       vscode.window.onDidChangeActiveColorTheme(() => this.pushAppearance(ctx)),
       vscode.workspace.onDidChangeConfiguration((e) => {
