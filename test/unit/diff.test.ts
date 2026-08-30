@@ -84,4 +84,17 @@ describe('buildAddedFileDiff', () => {
     const diff = buildAddedFileDiff('empty.txt', '');
     expect(diff.hunks[0].lines).toEqual([]);
   });
+
+  it('does not render a spurious blank line for content ending in a newline', () => {
+    const diff = buildAddedFileDiff('new.txt', 'a\nb\n');
+    expect(diff.hunks[0].lines).toEqual([
+      { ln1: null, ln2: 1, type: 'add', text: 'a' },
+      { ln1: null, ln2: 2, type: 'add', text: 'b' },
+    ]);
+  });
+
+  it('treats a lone trailing newline as an empty file, not a one-line file', () => {
+    const diff = buildAddedFileDiff('empty.txt', '\n');
+    expect(diff.hunks[0].lines).toEqual([]);
+  });
 });

@@ -99,7 +99,11 @@ export function parseUnifiedDiff(raw: string): FileDiff[] {
 
 /** Builds a synthetic all-additions diff for an untracked file (nothing to diff against). */
 export function buildAddedFileDiff(path: string, content: string): FileDiff {
-  const lines = content.length ? content.split('\n') : [];
+  // A trailing "\n" is a line terminator, not a blank final line: split() would otherwise
+  // produce an extra empty element for the overwhelmingly common case of files ending in
+  // a newline, rendering a spurious blank "added" line at the bottom of the diff.
+  const withoutTrailingNewline = content.endsWith('\n') ? content.slice(0, -1) : content;
+  const lines = withoutTrailingNewline.length ? withoutTrailingNewline.split('\n') : [];
   return {
     path,
     binary: false,
