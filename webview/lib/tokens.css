@@ -1,0 +1,106 @@
+/*
+ * Token layer ported from the "Orbit Git" design mockup. By default every
+ * token resolves through a `--vscode-*` variable (so Branchly follows the
+ * user's active editor theme) and falls back to the mockup's own literal
+ * value when that variable is unset. Explicitly forcing dark/light (see
+ * [data-theme] below) instead pins the mockup's exact palette.
+ */
+.orb {
+  --bg: var(--vscode-editor-background, #1a1c20);
+  --chrome: var(--vscode-tab-inactiveBackground, #202327);
+  --panel: var(--vscode-sideBar-background, #1e2125);
+  --panel2: var(--vscode-editorWidget-background, #23262b);
+  --border: var(--vscode-widget-border, var(--vscode-panel-border, #34383f));
+  --fg: var(--vscode-foreground, #c9ccd1);
+  --fg2: var(--vscode-descriptionForeground, #8a9099);
+  --fg3: var(--vscode-disabledForeground, #5f656d);
+  --sel: var(--vscode-list-inactiveSelectionBackground, #2c3a4d);
+  --hl: var(--vscode-list-hoverBackground, #2a2e34);
+  --a1: var(--vscode-charts-blue, #5f9ede);
+  --a2: var(--vscode-charts-green, #79c07a);
+  --a3: var(--vscode-charts-orange, #d9a45b);
+  --a4: var(--vscode-charts-purple, #b18ad4);
+  --a5: var(--vscode-charts-red, #e0736e);
+  --add: rgba(121, 192, 122, 0.16);
+  --del: rgba(224, 115, 110, 0.16);
+  --addb: var(--vscode-gitDecoration-addedResourceForeground, #79c07a);
+  --delb: var(--vscode-gitDecoration-deletedResourceForeground, #e0736e);
+  --row: 26px;
+  --panelh: 430px;
+  --fs: 12.5px;
+  --code: 12.5px/20px
+    var(--vscode-editor-font-family, ui-monospace, SFMono-Regular, Menlo, monospace);
+  --shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+
+  height: 100%;
+  min-width: 640px;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--fg);
+  font:
+    var(--fs) / 1.45 -apple-system,
+    'Segoe UI',
+    Helvetica,
+    system-ui,
+    sans-serif;
+}
+
+.orb[data-theme='dark'] {
+  --bg: #1a1c20;
+  --chrome: #202327;
+  --panel: #1e2125;
+  --panel2: #23262b;
+  --border: #34383f;
+  --fg: #c9ccd1;
+  --fg2: #8a9099;
+  --fg3: #5f656d;
+  --sel: #2c3a4d;
+  --hl: #2a2e34;
+  --a1: #5f9ede;
+  --a2: #79c07a;
+  --a3: #d9a45b;
+  --a4: #b18ad4;
+  --a5: #e0736e;
+  --addb: #79c07a;
+  --delb: #e0736e;
+  --shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+}
+
+.orb[data-theme='light'] {
+  --bg: #fcfcfa;
+  --chrome: #f0efeb;
+  --panel: #ffffff;
+  --panel2: #f6f5f2;
+  --border: #dcdad3;
+  --fg: #25272b;
+  --fg2: #6b7078;
+  --fg3: #9aa0a7;
+  --sel: #dbe7f7;
+  --hl: #eef0f2;
+  --a1: #2f6fb0;
+  --a2: #3f8b46;
+  --a3: #a06a13;
+  --a4: #7f4fae;
+  --a5: #c0403a;
+  --add: rgba(63, 139, 70, 0.13);
+  --del: rgba(192, 64, 58, 0.11);
+  --addb: #3f8b46;
+  --delb: #c0403a;
+  --shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+}
+
+.orb[data-density='compact'] {
+  --row: 21px;
+  --panelh: 390px;
+  --fs: 11.5px;
+  --code: 11.5px/17px
+    var(--vscode-editor-font-family, ui-monospace, SFMono-Regular, Menlo, monospace);
+}
+
+.orb[data-mono='1'] {
+  --a1: var(--vscode-descriptionForeground, #8b9099);
+  --a2: var(--vscode-descriptionForeground, #8b9099);
+  --a3: var(--vscode-descriptionForeground, #8b9099);
+  --a4: var(--vscode-descriptionForeground, #8b9099);
+}
