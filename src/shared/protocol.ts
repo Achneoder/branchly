@@ -190,7 +190,7 @@ export type HostToWebviewMessage =
   | { type: 'conflicts:list'; entries: ConflictEntry[] }
   | { type: 'conflicts:resolved'; path: string }
   | { type: 'rebase:status'; status: RebaseStatus }
-  | { type: 'rebase:todo'; items: RebaseTodoItem[] }
+  | { type: 'rebase:todo'; items: RebaseTodoItem[]; base: string }
   | { type: 'rebase:preview'; items: { text: string; color: string }[] }
   | { type: 'branches:list'; branches: BranchItem[] }
   | { type: 'menu:open'; x: number; y: number; items: ContextMenuItem[]; contextHash: string }
@@ -225,6 +225,7 @@ export type WebviewToHostMessage =
   | { type: 'conflicts:acceptTheirs'; path: string }
   | { type: 'conflicts:keepBoth'; path: string }
   | { type: 'conflicts:openMergeEditor'; path: string }
+  | { type: 'rebase:request' }
   | { type: 'rebase:start'; base: string }
   | { type: 'rebase:reorder'; fromIndex: number; toIndex: number }
   | { type: 'rebase:setAction'; id: string; action: RebaseTodoItem['action'] }
