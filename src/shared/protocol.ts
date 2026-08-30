@@ -220,6 +220,7 @@ export type WebviewToHostMessage =
   | { type: 'shelf:create'; message: string; keepStaged: boolean }
   | { type: 'shelf:apply'; index: number; drop: boolean }
   | { type: 'shelf:drop'; index: number }
+  | { type: 'conflicts:request' }
   | { type: 'conflicts:acceptOurs'; path: string }
   | { type: 'conflicts:acceptTheirs'; path: string }
   | { type: 'conflicts:keepBoth'; path: string }
