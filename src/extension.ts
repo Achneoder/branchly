@@ -4,6 +4,7 @@ import { PanelViewProvider } from './views/panelViewProvider';
 import { BranchlyStatusBar } from './statusbar/statusBar';
 import { registerCommands } from './commands';
 import { BRANCHLY_SCHEME, GitContentProvider } from './editor/contentProvider';
+import { BlameDecorationController } from './editor/blameDecorations';
 
 let container: Container | undefined;
 
@@ -31,7 +32,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   context.subscriptions.push(statusBar);
   void statusBar.refresh();
 
-  registerCommands(context, container, panel);
+  const blameDecorations = new BlameDecorationController(container);
+  context.subscriptions.push(blameDecorations);
+
+  registerCommands(context, container, panel, blameDecorations);
 }
 
 export function deactivate(): void {

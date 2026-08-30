@@ -65,7 +65,11 @@ export async function getBlame(
   git: GitService,
   path: string,
   signal?: AbortSignal,
+  revision?: string,
 ): Promise<BlameLine[]> {
-  const raw = await git.raw(['blame', '--porcelain', '--', path], signal);
+  const args = ['blame', '--porcelain'];
+  if (revision) args.push(revision);
+  args.push('--', path);
+  const raw = await git.raw(args, signal);
   return parseBlamePorcelain(raw).map(toBlameLine);
 }
