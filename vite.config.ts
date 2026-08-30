@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import path from 'node:path';
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [svelte()],
   root: path.resolve(__dirname, 'webview'),
   resolve: {
@@ -13,7 +13,9 @@ export default defineConfig({
   build: {
     outDir: path.resolve(__dirname, 'dist/webview'),
     emptyOutDir: true,
-    sourcemap: true,
+    // Skip shipping a ~600KB sourcemap in the packaged .vsix; still generated for
+    // `watch:webview`, which passes --mode development for local debugging.
+    sourcemap: mode !== 'production',
     target: 'es2022',
     rollupOptions: {
       input: path.resolve(__dirname, 'webview/main.ts'),
@@ -23,4 +25,4 @@ export default defineConfig({
       },
     },
   },
-});
+}));

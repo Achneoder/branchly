@@ -6,6 +6,14 @@
   "publisher": "achneoder",
   "license": "MIT",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Achneoder/branchly"
+  },
+  "bugs": {
+    "url": "https://github.com/Achneoder/branchly/issues"
+  },
+  "homepage": "https://github.com/Achneoder/branchly#readme",
   "engines": {
     "vscode": "^1.90.0"
   },
@@ -224,7 +232,7 @@
   "scripts": {
     "build": "node esbuild.mjs --production && vite build",
     "watch:ext": "node esbuild.mjs --watch",
-    "watch:webview": "vite build --watch",
+    "watch:webview": "vite build --watch --mode development",
     "package": "npm run build && vsce package",
     "lint": "eslint . --ext .ts,.svelte",
     "format": "prettier --check .",
