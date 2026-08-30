@@ -35,6 +35,10 @@ function createAppState() {
       case 'setTab':
         tab = msg.tab;
         break;
+      case 'branches:open':
+        branchPopupOpen = true;
+        postToHost({ type: 'branches:request' });
+        break;
       case 'error':
         lastError = msg.message;
         break;

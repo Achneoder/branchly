@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import type { Container } from '../core/container';
 import type { PanelViewProvider } from '../views/panelViewProvider';
 import type { BlameDecorationController } from '../editor/blameDecorations';
+import type { TabId } from '../shared/protocol';
 
 export function registerCommands(
   context: vscode.ExtensionContext,
@@ -9,10 +10,8 @@ export function registerCommands(
   panel: PanelViewProvider,
   blameDecorations: BlameDecorationController,
 ): void {
-  const openTab = (tab: 'log' | 'commit' | 'conflicts' | 'rebase' | 'shelf' | 'history') =>
-    vscode.commands.registerCommand(`branchly.open${capitalize(tab)}`, async () => {
-      await vscode.commands.executeCommand('branchly.main.focus');
-    });
+  const openTab = (tab: TabId) =>
+    vscode.commands.registerCommand(`branchly.open${capitalize(tab)}`, () => panel.openTab(tab));
 
   context.subscriptions.push(
     vscode.commands.registerCommand('branchly.refresh', () => panel.refresh()),
@@ -22,9 +21,7 @@ export function registerCommands(
     openTab('rebase'),
     openTab('shelf'),
     openTab('history'),
-    vscode.commands.registerCommand('branchly.showBranchPopup', async () => {
-      await vscode.commands.executeCommand('branchly.main.focus');
-    }),
+    vscode.commands.registerCommand('branchly.showBranchPopup', () => panel.openBranchPopup()),
     vscode.commands.registerCommand('branchly.toggleBlame', () => blameDecorations.toggle()),
   );
 
