@@ -2,9 +2,9 @@ import * as vscode from 'vscode';
 import type { Container } from '../core/container';
 import { AbortRegistry } from '../core/abortRegistry';
 import { readAppearance } from '../core/config';
-import { getStatusSummary } from '../git/status';
-import type { AppearanceState, RepoStatusSummary, WebviewToHostMessage } from '../shared/protocol';
+import type { AppearanceState, WebviewToHostMessage } from '../shared/protocol';
 import type { PanelContext } from './handlers/types';
+import { getRepoStatus } from './handlers/shared';
 import * as logHandler from './handlers/log';
 import * as commitHandler from './handlers/commit';
 import * as conflictsHandler from './handlers/conflicts';
@@ -12,14 +12,6 @@ import * as rebaseHandler from './handlers/rebase';
 import * as shelfHandler from './handlers/shelf';
 import * as historyHandler from './handlers/history';
 import * as branchesHandler from './handlers/branches';
-
-const EMPTY_STATUS: RepoStatusSummary = {
-  branch: '',
-  ahead: 0,
-  behind: 0,
-  conflictCount: 0,
-  hasRepo: false,
-};
 
 function nonce(): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -94,19 +86,8 @@ export class PanelViewProvider implements vscode.WebviewViewProvider {
     ctx.post({ type: 'appearance', appearance: readAppearance() });
   }
 
-  private async currentStatus(): Promise<RepoStatusSummary> {
-    const git = this.container.activeGitService;
-    if (!git) return EMPTY_STATUS;
-    try {
-      return await getStatusSummary(git);
-    } catch (err) {
-      this.container.logger.error('Failed to read repository status', err);
-      return EMPTY_STATUS;
-    }
-  }
-
   private async pushStatus(ctx: PanelContext): Promise<void> {
-    ctx.post({ type: 'status', status: await this.currentStatus() });
+    ctx.post({ type: 'status', status: await getRepoStatus(ctx) });
   }
 
   private async applyAppearancePatch(patch: Partial<AppearanceState>): Promise<void> {
@@ -132,7 +113,7 @@ export class PanelViewProvider implements vscode.WebviewViewProvider {
           ctx.post({
             type: 'init',
             appearance: readAppearance(),
-            status: await this.currentStatus(),
+            status: await getRepoStatus(ctx),
           });
           return;
         case msg.type === 'setTab':

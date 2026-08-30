@@ -16,6 +16,9 @@ export interface LogOptions {
   skip?: number;
   revisionRange?: string;
   path?: string;
+  author?: string;
+  since?: string;
+  until?: string;
 }
 
 const FIELD = '\x1f';
@@ -26,6 +29,9 @@ export function buildLogArgs(opts: LogOptions = {}): string[] {
   const args = ['log', `--pretty=format:${FORMAT}`, '--date=iso-strict', '--decorate=full'];
   if (opts.maxCount) args.push(`--max-count=${opts.maxCount}`);
   if (opts.skip) args.push(`--skip=${opts.skip}`);
+  if (opts.author) args.push(`--author=${opts.author}`);
+  if (opts.since) args.push(`--since=${opts.since}`);
+  if (opts.until) args.push(`--until=${opts.until}`);
   args.push(opts.revisionRange ?? 'HEAD');
   if (opts.path) args.push('--', opts.path);
   return args;
