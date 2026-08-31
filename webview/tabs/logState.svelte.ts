@@ -24,7 +24,7 @@ function createLogState() {
 
   function request(append: boolean): void {
     loading = true;
-    postToHost({ type: 'log:request', query: '', filters, append });
+    postToHost({ type: 'log:request', query: '', filters: [...filters], append });
   }
 
   function selectCommit(hash: string): void {
