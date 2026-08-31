@@ -216,6 +216,8 @@ export type WebviewToHostMessage =
   | { type: 'commit:setAmend'; amend: boolean }
   | { type: 'commit:selectFile'; path: string }
   | { type: 'commit:submit'; push: boolean }
+  | { type: 'commit:toggleFiles'; paths: string[]; staged: boolean }
+  | { type: 'commit:stashSelected'; message: string }
   | { type: 'history:openFile'; path: string }
   | { type: 'history:selectCommit'; path: string; hash: string }
   | { type: 'shelf:request' }

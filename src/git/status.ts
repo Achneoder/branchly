@@ -67,7 +67,10 @@ export async function getStatusEntries(
   git: GitService,
   signal?: AbortSignal,
 ): Promise<RawStatusEntry[]> {
-  const raw = await git.raw(['status', '--porcelain=v2', '-z'], signal);
+  const raw = await git.raw(
+    ['status', '--porcelain=v2', '--untracked-files=all', '-z'],
+    signal,
+  );
   return parsePorcelainV2(raw);
 }
 

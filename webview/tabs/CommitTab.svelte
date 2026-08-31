@@ -2,12 +2,8 @@
   import { appState } from '../lib/state.svelte';
   import { commitState } from './commitState.svelte';
   import DiffView from '../lib/DiffView.svelte';
-
-  function statusColor(status: string): string {
-    if (status === 'A' || status === '?') return 'var(--a2)';
-    if (status === 'D') return 'var(--a5)';
-    return 'var(--a1)';
-  }
+  import CommitFileTree from './CommitFileTree.svelte';
+  import { buildFileTree } from '../lib/fileTree';
 </script>
 
 <div class="commit-tab">
@@ -26,28 +22,7 @@
             <span class="group-name">{group.name}</span>
             <span class="group-meta">{group.files.length} files</span>
           </div>
-          {#each group.files as file (file.path)}
-            <div
-              class="file-row"
-              class:selected={file.path === commitState.selectedPath}
-              role="row"
-              tabindex="0"
-              onclick={() => commitState.selectFile(file.path)}
-              onkeydown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') commitState.selectFile(file.path);
-              }}
-            >
-              <input
-                type="checkbox"
-                checked={file.staged}
-                onclick={(e) => e.stopPropagation()}
-                onchange={(e) =>
-                  commitState.toggleFile(file.path, (e.currentTarget as HTMLInputElement).checked)}
-              />
-              <span class="status" style="color:{statusColor(file.status)}">{file.status}</span>
-              <span class="path">{file.path}</span>
-            </div>
-          {/each}
+          <CommitFileTree node={buildFileTree(group.files)} depth={0} />
         </div>
       {/each}
       {#if commitState.totalFiles === 0}
@@ -74,6 +49,12 @@
         </button>
         <button disabled={commitState.submitting} onclick={() => commitState.submit(true)}>
           Commit and Push…
+        </button>
+        <button
+          disabled={commitState.submitting}
+          onclick={() => commitState.openStashComposer()}
+        >
+          Stash Selected…
         </button>
         <div class="spacer"></div>
         <label class="amend">
@@ -104,6 +85,23 @@
     </div>
     <DiffView diff={commitState.diff} mode={appState.appearance.diffMode} />
   </div>
+
+  {#if commitState.stashComposerOpen}
+    <div class="scrim" role="presentation" onclick={() => commitState.closeStashComposer()}></div>
+    <div class="composer">
+      <div class="composer-title">Stash Selected Files</div>
+      <input
+        placeholder="Stash message"
+        value={commitState.stashMessage}
+        oninput={(e) =>
+          commitState.setStashMessage((e.currentTarget as HTMLInputElement).value)}
+      />
+      <div class="composer-actions">
+        <button onclick={() => commitState.closeStashComposer()}>Cancel</button>
+        <button class="primary" onclick={() => commitState.stashSelected()}>Stash</button>
+      </div>
+    </div>
+  {/if}
 </div>
 
 <style>
@@ -111,6 +109,7 @@
     flex: 1;
     min-height: 0;
     display: flex;
+    position: relative;
   }
 
   .changes-col {
@@ -161,35 +160,6 @@
   }
   .group-meta {
     color: var(--fg3);
-  }
-  .file-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    height: 26px;
-    padding: 0 12px 0 28px;
-    cursor: default;
-  }
-  .file-row:hover {
-    background: var(--hl);
-  }
-  .file-row.selected {
-    background: var(--sel);
-  }
-  .file-row .status {
-    flex: none;
-    width: 11px;
-    text-align: center;
-    font:
-      600 10px ui-monospace,
-      monospace;
-  }
-  .file-row .path {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    color: var(--fg);
   }
   .empty {
     padding: 20px;
@@ -273,5 +243,52 @@
   }
   .diff-header button {
     color: var(--a1);
+  }
+
+  .scrim {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.28);
+    z-index: 40;
+  }
+  .composer {
+    position: absolute;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 360px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    box-shadow: var(--shadow);
+    z-index: 50;
+  }
+  .composer-title {
+    font-weight: 600;
+    color: var(--fg);
+  }
+  .composer input {
+    padding: 6px 9px;
+  }
+  .composer-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  .composer-actions button {
+    padding: 5px 12px;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    color: var(--fg2);
+  }
+  .composer-actions button.primary {
+    background: var(--a1);
+    color: #fff;
+    font-weight: 600;
+    border: none;
   }
 </style>

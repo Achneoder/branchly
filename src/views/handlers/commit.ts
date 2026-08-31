@@ -1,7 +1,9 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { buildAddedFileDiff, getWorkingTreeFileDiff } from '../../git/diff';
+import type { GitService } from '../../git/gitService';
 import { getStatusEntries, toFileStatus, type RawStatusEntry } from '../../git/status';
+import { createStash } from '../../git/stash';
 import type { ChangelistGroup, FileChange, WebviewToHostMessage } from '../../shared/protocol';
 import type { PanelContext } from './types';
 import { refreshAfterMutation } from './shared';
@@ -72,6 +74,25 @@ export async function refresh(ctx: PanelContext): Promise<void> {
   if (ctx.container.activeGitService) await pushChangelists(ctx);
 }
 
+/** Selection is keyed by `entry.path` (a rename's *new* path), so a selected rename needs
+ * its `origPath` added back in before it's handed to `git add`/`git stash push` — otherwise
+ * the old side of the rename is left out of the pathspec entirely. */
+async function resolveSelectedPaths(git: GitService, state: CommitPanelState): Promise<string[]> {
+  const selected = [...state.selection.entries()]
+    .filter(([, included]) => included)
+    .map(([p]) => p);
+  if (selected.length === 0) return selected;
+  const selectedSet = new Set(selected);
+  const entries = await getStatusEntries(git);
+  const paths = new Set(selected);
+  for (const entry of entries) {
+    if (entry.kind === 'renamed' && entry.origPath && selectedSet.has(entry.path)) {
+      paths.add(entry.origPath);
+    }
+  }
+  return [...paths];
+}
+
 export async function handle(msg: WebviewToHostMessage, ctx: PanelContext): Promise<void> {
   const git = ctx.container.activeGitService;
   if (!git) return;
@@ -84,6 +105,11 @@ export async function handle(msg: WebviewToHostMessage, ctx: PanelContext): Prom
 
     case 'commit:toggleFile':
       state.selection.set(msg.path, msg.staged);
+      await pushChangelists(ctx);
+      return;
+
+    case 'commit:toggleFiles':
+      for (const p of msg.paths) state.selection.set(p, msg.staged);
       await pushChangelists(ctx);
       return;
 
@@ -110,9 +136,7 @@ export async function handle(msg: WebviewToHostMessage, ctx: PanelContext): Prom
     }
 
     case 'commit:submit': {
-      const selected = [...state.selection.entries()]
-        .filter(([, included]) => included)
-        .map(([p]) => p);
+      const selected = await resolveSelectedPaths(git, state);
       if (selected.length === 0) {
         ctx.post({ type: 'commit:result', ok: false, message: 'No files selected to commit.' });
         return;
@@ -131,6 +155,27 @@ export async function handle(msg: WebviewToHostMessage, ctx: PanelContext): Prom
         if (msg.push) await git.raw(['push']);
         state.message = '';
         state.amend = false;
+        ctx.post({ type: 'commit:result', ok: true });
+        await refreshAfterMutation(ctx);
+        await pushChangelists(ctx);
+      } catch (err) {
+        ctx.post({
+          type: 'commit:result',
+          ok: false,
+          message: err instanceof Error ? err.message : String(err),
+        });
+      }
+      return;
+    }
+
+    case 'commit:stashSelected': {
+      const selected = await resolveSelectedPaths(git, state);
+      if (selected.length === 0) {
+        ctx.post({ type: 'commit:result', ok: false, message: 'No files selected to stash.' });
+        return;
+      }
+      try {
+        await createStash(git, msg.message || 'WIP', false, undefined, selected);
         ctx.post({ type: 'commit:result', ok: true });
         await refreshAfterMutation(ctx);
         await pushChangelists(ctx);

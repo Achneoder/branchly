@@ -64,9 +64,11 @@ export async function createStash(
   message: string,
   keepIndex: boolean,
   signal?: AbortSignal,
+  paths?: string[],
 ): Promise<void> {
   const args = ['stash', 'push', '-u', '-m', message];
   if (keepIndex) args.push('--keep-index');
+  if (paths?.length) args.push('--', ...paths);
   await git.raw(args, signal);
 }
 

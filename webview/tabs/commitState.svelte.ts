@@ -9,6 +9,8 @@ function createCommitState() {
   let diff = $state<FileDiff | undefined>(undefined);
   let resultMessage = $state<string | undefined>(undefined);
   let submitting = $state(false);
+  let stashComposerOpen = $state(false);
+  let stashMessage = $state('');
 
   onHostMessage((msg) => {
     switch (msg.type) {
@@ -59,6 +61,12 @@ function createCommitState() {
     get totalFiles() {
       return totalFiles;
     },
+    get stashComposerOpen() {
+      return stashComposerOpen;
+    },
+    get stashMessage() {
+      return stashMessage;
+    },
     setMessage(value: string) {
       message = value;
       postToHost({ type: 'commit:setMessage', message: value });
@@ -69,6 +77,9 @@ function createCommitState() {
     },
     toggleFile(filePath: string, staged: boolean) {
       postToHost({ type: 'commit:toggleFile', path: filePath, staged });
+    },
+    toggleFiles(paths: string[], staged: boolean) {
+      postToHost({ type: 'commit:toggleFiles', paths: [...paths], staged });
     },
     selectFile(filePath: string) {
       selectedPath = filePath;
@@ -82,6 +93,22 @@ function createCommitState() {
     },
     dismissResult() {
       resultMessage = undefined;
+    },
+    openStashComposer() {
+      stashComposerOpen = true;
+      stashMessage = '';
+    },
+    closeStashComposer() {
+      stashComposerOpen = false;
+    },
+    setStashMessage(value: string) {
+      stashMessage = value;
+    },
+    stashSelected() {
+      submitting = true;
+      resultMessage = undefined;
+      postToHost({ type: 'commit:stashSelected', message: stashMessage });
+      stashComposerOpen = false;
     },
   };
 }
