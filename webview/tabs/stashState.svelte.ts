@@ -1,7 +1,7 @@
 import type { FileDiff, StashEntry } from '@shared/protocol';
 import { onHostMessage, postToHost } from '../lib/bridge';
 
-function createShelfState() {
+function createStashState() {
   let entries = $state<StashEntry[]>([]);
   let selectedIndex = $state<number | undefined>(undefined);
   let diffs = $state<FileDiff[]>([]);
@@ -11,20 +11,20 @@ function createShelfState() {
 
   onHostMessage((msg) => {
     switch (msg.type) {
-      case 'shelf:list':
+      case 'stash:list':
         entries = msg.entries;
         if (selectedIndex !== undefined && !entries[selectedIndex]) selectedIndex = undefined;
         break;
-      case 'shelf:diff':
+      case 'stash:diff':
         diffs = msg.diffs;
         break;
       case 'status':
-        postToHost({ type: 'shelf:request' });
+        postToHost({ type: 'stash:request' });
         break;
     }
   });
 
-  postToHost({ type: 'shelf:request' });
+  postToHost({ type: 'stash:request' });
 
   return {
     get entries() {
@@ -48,7 +48,7 @@ function createShelfState() {
     select(index: number) {
       selectedIndex = index;
       diffs = [];
-      postToHost({ type: 'shelf:selectEntry', index });
+      postToHost({ type: 'stash:selectEntry', index });
     },
     openComposer() {
       composerOpen = true;
@@ -65,16 +65,16 @@ function createShelfState() {
       keepStaged = value;
     },
     create() {
-      postToHost({ type: 'shelf:create', message: composerMessage, keepStaged });
+      postToHost({ type: 'stash:create', message: composerMessage, keepStaged });
       composerOpen = false;
     },
     apply(index: number, drop: boolean) {
-      postToHost({ type: 'shelf:apply', index, drop });
+      postToHost({ type: 'stash:apply', index, drop });
     },
     drop(index: number) {
-      postToHost({ type: 'shelf:drop', index });
+      postToHost({ type: 'stash:drop', index });
     },
   };
 }
 
-export const shelfState = createShelfState();
+export const stashState = createStashState();

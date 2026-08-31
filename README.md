@@ -1,7 +1,7 @@
 # Branchly
 
 JetBrains-grade Git tooling for VS Code — a commit graph, changelist-based staging, an
-interactive rebase editor, a three-pane conflict resolver, a shelf, and inline blame, all in
+interactive rebase editor, a three-pane conflict resolver, a stash browser, and inline blame, all in
 one bottom panel.
 
 ## Features
@@ -13,7 +13,7 @@ one bottom panel.
   and keep-both.
 - **Rebase** — drag-to-reorder interactive rebase with pick/reword/squash/fixup/drop actions and
   a result preview.
-- **Shelf** — stash/shelve, apply, drop, unshelve, with a preview diff.
+- **Stash** — stash, apply, drop, apply-and-drop, with a preview diff.
 - **History** — per-file commit history with a full blame column, plus inline editor blame.
 - **Branches** — quick-switch popup (Ctrl+Shift+` / Cmd+Shift+`) for checkout, comparing
   branches, and creating a new branch from a ref.

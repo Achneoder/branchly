@@ -1,43 +1,42 @@
 <script lang="ts">
   import { appState } from '../lib/state.svelte';
-  import { shelfState } from './shelfState.svelte';
+  import { stashState } from './stashState.svelte';
   import DiffView from '../lib/DiffView.svelte';
 
   const selected = $derived(
-    shelfState.selectedIndex !== undefined
-      ? shelfState.entries[shelfState.selectedIndex]
+    stashState.selectedIndex !== undefined
+      ? stashState.entries[stashState.selectedIndex]
       : undefined,
   );
 </script>
 
-<div class="shelf-tab">
+<div class="stash-tab">
   <div class="list-col">
     <div class="list-header">
-      <span>Shelf</span>
+      <span>Stash</span>
       <div class="spacer"></div>
-      <button class="new-btn" onclick={() => shelfState.openComposer()}>Shelve Changes…</button>
+      <button class="new-btn" onclick={() => stashState.openComposer()}>Stash Changes…</button>
     </div>
     <div class="list">
-      {#each shelfState.entries as entry, i (entry.ref)}
+      {#each stashState.entries as entry, i (entry.ref)}
         <div
           class="entry"
-          class:selected={i === shelfState.selectedIndex}
+          class:selected={i === stashState.selectedIndex}
           role="row"
           tabindex="0"
-          onclick={() => shelfState.select(i)}
+          onclick={() => stashState.select(i)}
           onkeydown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') shelfState.select(i);
+            if (e.key === 'Enter' || e.key === ' ') stashState.select(i);
           }}
         >
           <div class="entry-top">
-            <span class="kind">{entry.kind}</span>
             <span class="name">{entry.message || entry.ref}</span>
           </div>
           <div class="entry-meta">{entry.fileCount} files · {entry.date}</div>
         </div>
       {/each}
-      {#if shelfState.entries.length === 0}
-        <div class="empty">No shelved or stashed changes.</div>
+      {#if stashState.entries.length === 0}
+        <div class="empty">No stashed changes.</div>
       {/if}
     </div>
   </div>
@@ -47,51 +46,51 @@
       <span>{selected?.message ?? ''}</span>
       <div class="spacer"></div>
       {#if selected}
-        <button onclick={() => shelfState.apply(selected.index, false)}>Unshelve…</button>
-        <button class="primary" onclick={() => shelfState.apply(selected.index, true)}
+        <button onclick={() => stashState.apply(selected.index, false)}>Apply…</button>
+        <button class="primary" onclick={() => stashState.apply(selected.index, true)}
           >Apply and Drop</button
         >
-        <button onclick={() => shelfState.drop(selected.index)}>Drop</button>
+        <button onclick={() => stashState.drop(selected.index)}>Drop</button>
       {/if}
     </div>
     <div class="diffs">
-      {#each shelfState.diffs as diff (diff.path)}
+      {#each stashState.diffs as diff (diff.path)}
         <div class="file-header">{diff.path}</div>
         <DiffView {diff} mode={appState.appearance.diffMode} />
       {/each}
-      {#if selected && shelfState.diffs.length === 0}
+      {#if selected && stashState.diffs.length === 0}
         <div class="empty">Loading diff…</div>
       {/if}
     </div>
   </div>
 
-  {#if shelfState.composerOpen}
-    <div class="scrim" role="presentation" onclick={() => shelfState.closeComposer()}></div>
+  {#if stashState.composerOpen}
+    <div class="scrim" role="presentation" onclick={() => stashState.closeComposer()}></div>
     <div class="composer">
-      <div class="composer-title">Shelve Changes</div>
+      <div class="composer-title">Stash Changes</div>
       <input
-        placeholder="Shelf name"
-        value={shelfState.composerMessage}
-        oninput={(e) => shelfState.setComposerMessage((e.currentTarget as HTMLInputElement).value)}
+        placeholder="Stash name"
+        value={stashState.composerMessage}
+        oninput={(e) => stashState.setComposerMessage((e.currentTarget as HTMLInputElement).value)}
       />
       <label class="keep-staged">
         <input
           type="checkbox"
-          checked={shelfState.keepStaged}
-          onchange={(e) => shelfState.setKeepStaged((e.currentTarget as HTMLInputElement).checked)}
+          checked={stashState.keepStaged}
+          onchange={(e) => stashState.setKeepStaged((e.currentTarget as HTMLInputElement).checked)}
         />
         Keep staged changes in the working tree
       </label>
       <div class="composer-actions">
-        <button onclick={() => shelfState.closeComposer()}>Cancel</button>
-        <button class="primary" onclick={() => shelfState.create()}>Shelve</button>
+        <button onclick={() => stashState.closeComposer()}>Cancel</button>
+        <button class="primary" onclick={() => stashState.create()}>Stash</button>
       </div>
     </div>
   {/if}
 </div>
 
 <style>
-  .shelf-tab {
+  .stash-tab {
     flex: 1;
     min-height: 0;
     display: flex;
@@ -144,16 +143,6 @@
     display: flex;
     align-items: center;
     gap: 8px;
-  }
-  .kind {
-    font:
-      600 10px ui-monospace,
-      monospace;
-    padding: 1px 5px;
-    border-radius: 3px;
-    color: var(--a1);
-    border: 1px solid var(--a1);
-    text-transform: uppercase;
   }
   .name {
     min-width: 0;

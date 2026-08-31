@@ -5,7 +5,7 @@
   import CommitTab from './tabs/CommitTab.svelte';
   import ConflictsTab from './tabs/ConflictsTab.svelte';
   import RebaseTab from './tabs/RebaseTab.svelte';
-  import ShelfTab from './tabs/ShelfTab.svelte';
+  import StashTab from './tabs/StashTab.svelte';
   import HistoryTab from './tabs/HistoryTab.svelte';
   import BranchPopup from './lib/BranchPopup.svelte';
 
@@ -14,7 +14,7 @@
     { id: 'commit', label: 'Commit' },
     { id: 'conflicts', label: 'Conflicts' },
     { id: 'rebase', label: 'Rebase' },
-    { id: 'shelf', label: 'Shelf' },
+    { id: 'stash', label: 'Stash' },
     { id: 'history', label: 'History' },
   ];
 </script>
@@ -81,8 +81,8 @@
       <ConflictsTab />
     {:else if appState.tab === 'rebase'}
       <RebaseTab />
-    {:else if appState.tab === 'shelf'}
-      <ShelfTab />
+    {:else if appState.tab === 'stash'}
+      <StashTab />
     {:else if appState.tab === 'history'}
       <HistoryTab />
     {/if}

@@ -9,7 +9,7 @@ import { GitService } from '../../src/git/gitService';
 import { getStatusEntries } from '../../src/git/status';
 import { applyStash, createStash, dropStash, listStashes } from '../../src/git/stash';
 
-describe('shelf / stash round-trip (real repo)', () => {
+describe('stash round-trip (real repo)', () => {
   let fx: Fixture;
   let git: GitService;
 
@@ -23,7 +23,7 @@ describe('shelf / stash round-trip (real repo)', () => {
 
   it('applying (pop) restores the stashed working change', async () => {
     const { modified } = makeWorkingChanges(fx);
-    await createStash(git, 'test shelf', false);
+    await createStash(git, 'test stash', false);
 
     let entries = await getStatusEntries(git);
     assert.equal(

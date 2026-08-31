@@ -1,7 +1,7 @@
 // Message contract between the extension host and the webview panel.
 // Both sides import this file so the payloads stay compile-checked in lockstep.
 
-export type TabId = 'log' | 'commit' | 'conflicts' | 'rebase' | 'shelf' | 'history';
+export type TabId = 'log' | 'commit' | 'conflicts' | 'rebase' | 'stash' | 'history';
 
 export interface AppearanceState {
   theme: 'auto' | 'dark' | 'light';
@@ -102,7 +102,6 @@ export interface ChangelistGroup {
 export interface StashEntry {
   index: number;
   ref: string;
-  kind: 'stash' | 'shelf';
   message: string;
   branch: string;
   date: string;
@@ -187,8 +186,8 @@ export type HostToWebviewMessage =
   | { type: 'history:activeFile'; path: string | undefined }
   | { type: 'history:entries'; path: string; entries: CommitRow[] }
   | { type: 'history:blame'; path: string; lines: BlameLine[] }
-  | { type: 'shelf:list'; entries: StashEntry[] }
-  | { type: 'shelf:diff'; diffs: FileDiff[] }
+  | { type: 'stash:list'; entries: StashEntry[] }
+  | { type: 'stash:diff'; diffs: FileDiff[] }
   | { type: 'conflicts:list'; entries: ConflictEntry[] }
   | { type: 'conflicts:resolved'; path: string }
   | { type: 'rebase:status'; status: RebaseStatus }
@@ -220,11 +219,11 @@ export type WebviewToHostMessage =
   | { type: 'commit:stashSelected'; message: string }
   | { type: 'history:openFile'; path: string }
   | { type: 'history:selectCommit'; path: string; hash: string }
-  | { type: 'shelf:request' }
-  | { type: 'shelf:selectEntry'; index: number }
-  | { type: 'shelf:create'; message: string; keepStaged: boolean }
-  | { type: 'shelf:apply'; index: number; drop: boolean }
-  | { type: 'shelf:drop'; index: number }
+  | { type: 'stash:request' }
+  | { type: 'stash:selectEntry'; index: number }
+  | { type: 'stash:create'; message: string; keepStaged: boolean }
+  | { type: 'stash:apply'; index: number; drop: boolean }
+  | { type: 'stash:drop'; index: number }
   | { type: 'conflicts:request' }
   | { type: 'conflicts:acceptOurs'; path: string }
   | { type: 'conflicts:acceptTheirs'; path: string }

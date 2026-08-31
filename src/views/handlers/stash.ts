@@ -5,7 +5,6 @@ import {
   getStashDiff,
   getStashFileCount,
   listStashes,
-  stashKind,
   type RawStash,
 } from '../../git/stash';
 import { parseUnifiedDiff } from '../../git/diff';
@@ -20,7 +19,6 @@ function toStashEntry(raw: RawStash, fileCount: number): StashEntry {
   return {
     index: raw.index,
     ref: raw.ref,
-    kind: stashKind(raw.message),
     message: match ? match[2] || raw.message : raw.message,
     branch: match ? match[1] : '',
     date: raw.date,
@@ -33,7 +31,7 @@ async function pushList(ctx: PanelContext): Promise<void> {
   if (!git) return;
   const raws = await listStashes(git);
   const counts = await Promise.all(raws.map((r) => getStashFileCount(git, r.ref).catch(() => 0)));
-  ctx.post({ type: 'shelf:list', entries: raws.map((r, i) => toStashEntry(r, counts[i])) });
+  ctx.post({ type: 'stash:list', entries: raws.map((r, i) => toStashEntry(r, counts[i])) });
 }
 
 export async function refresh(ctx: PanelContext): Promise<void> {
@@ -45,26 +43,26 @@ export async function handle(msg: WebviewToHostMessage, ctx: PanelContext): Prom
   if (!git) return;
 
   switch (msg.type) {
-    case 'shelf:request':
+    case 'stash:request':
       await pushList(ctx);
       return;
 
-    case 'shelf:selectEntry': {
+    case 'stash:selectEntry': {
       const raws = await listStashes(git);
       const entry = raws[msg.index];
       if (!entry) return;
       const raw = await getStashDiff(git, entry.ref);
-      ctx.post({ type: 'shelf:diff', diffs: parseUnifiedDiff(raw) });
+      ctx.post({ type: 'stash:diff', diffs: parseUnifiedDiff(raw) });
       return;
     }
 
-    case 'shelf:create':
+    case 'stash:create':
       await createStash(git, msg.message || 'WIP', msg.keepStaged);
       await pushList(ctx);
       await refreshAfterMutation(ctx);
       return;
 
-    case 'shelf:apply': {
+    case 'stash:apply': {
       const raws = await listStashes(git);
       const entry = raws[msg.index];
       if (!entry) return;
@@ -74,7 +72,7 @@ export async function handle(msg: WebviewToHostMessage, ctx: PanelContext): Prom
       return;
     }
 
-    case 'shelf:drop': {
+    case 'stash:drop': {
       const raws = await listStashes(git);
       const entry = raws[msg.index];
       if (!entry) return;

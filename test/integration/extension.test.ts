@@ -15,7 +15,7 @@ describe('Branchly extension activation', () => {
       'branchly.openCommit',
       'branchly.openConflicts',
       'branchly.openRebase',
-      'branchly.openShelf',
+      'branchly.openStash',
       'branchly.openHistory',
       'branchly.showBranchPopup',
       'branchly.toggleBlame',

@@ -10,7 +10,7 @@ import * as logHandler from './handlers/log';
 import * as commitHandler from './handlers/commit';
 import * as conflictsHandler from './handlers/conflicts';
 import * as rebaseHandler from './handlers/rebase';
-import * as shelfHandler from './handlers/shelf';
+import * as stashHandler from './handlers/stash';
 import * as historyHandler from './handlers/history';
 import * as branchesHandler from './handlers/branches';
 
@@ -59,7 +59,7 @@ export class PanelViewProvider implements vscode.WebviewViewProvider {
       this.container.repositoryManager.onDidChangeRepositoryState(() => {
         void this.pushStatus(ctx);
         void commitHandler.refresh(ctx);
-        void shelfHandler.refresh(ctx);
+        void stashHandler.refresh(ctx);
         void conflictsHandler.refresh(ctx);
         void rebaseHandler.refresh(ctx);
       }),
@@ -155,8 +155,8 @@ export class PanelViewProvider implements vscode.WebviewViewProvider {
           return await conflictsHandler.handle(msg, ctx);
         case msg.type.startsWith('rebase:'):
           return await rebaseHandler.handle(msg, ctx);
-        case msg.type.startsWith('shelf:'):
-          return await shelfHandler.handle(msg, ctx);
+        case msg.type.startsWith('stash:'):
+          return await stashHandler.handle(msg, ctx);
         case msg.type.startsWith('history:'):
           return await historyHandler.handle(msg, ctx);
         case msg.type.startsWith('branches:'):

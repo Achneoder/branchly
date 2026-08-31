@@ -2,7 +2,7 @@
 
 Branchly is a VS Code extension that puts JetBrains-style Git tooling in a bottom-panel tool
 window: a lane-rendered commit graph, changelist-based staging, an interactive rebase editor, a
-three-pane conflict resolver, a shelf (stash), and file history with blame. The visual target is
+three-pane conflict resolver, a stash browser, and file history with blame. The visual target is
 the "Orbit Git" Claude Design mockup; keep new UI work consistent with its density, palette, and
 layout conventions (see "Mockup fidelity" below) unless the user asks for a different look.
 
@@ -47,7 +47,7 @@ src/
     panelViewProvider.ts     WebviewViewProvider: builds the webview HTML/CSP, dispatches
                              incoming messages to the right handler by type prefix, and
                              fans out repo-state-change events to every tab's refresh()
-    handlers/<tab>.ts        one file per tab (log, commit, conflicts, rebase, shelf,
+    handlers/<tab>.ts        one file per tab (log, commit, conflicts, rebase, stash,
                              history, branches) — the only place each tab's business logic
                              lives; `shared.ts` has the common status-refresh helper,
                              `commitRows.ts` the RawCommit -> CommitRow conversion shared
@@ -113,7 +113,7 @@ doesn't catch every Vite-only issue.
 This repo enforces [Conventional Commits](https://www.conventionalcommits.org/) via commitlint +
 husky's `commit-msg` hook (`commitlint.config.js`, `.husky/commit-msg`) — a badly-formed commit
 message is rejected locally, not just in CI. Use `feat`, `fix`, `refactor`, `test`, `docs`,
-`chore`, etc., with an optional scope, e.g. `feat(ui): add shelf apply-and-drop`,
+`chore`, etc., with an optional scope, e.g. `feat(ui): add stash apply-and-drop`,
 `fix(git): handle detached HEAD in status summary`. One logical change per commit; prefer several
 small commits over one that mixes unrelated concerns.
 
@@ -161,7 +161,7 @@ following that pattern (a data attribute on the root `.orb` element, tokens rede
 rather than component-local conditionals.
 
 Row heights, the 6-tab bottom-panel layout, the lane-graph column, and per-tab pane widths (268px
-commit detail, 360px changes list, 330px shelf list, 340px history list, 300px rebase preview) all
+commit detail, 360px changes list, 330px stash list, 340px history list, 300px rebase preview) all
 come directly from the mockup's own `Orbit Git.dc.html`. If you need to revisit the mockup, it's
 Claude Design project `33942ddf-7afe-4c47-9996-cfffa5035cd7` ("Git browser UI mockups").
 

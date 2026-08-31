@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildStashListArgs, parseStashList, stashKind } from '../../src/git/stash';
+import { buildStashListArgs, parseStashList } from '../../src/git/stash';
 
 const FIELD = '\x1f';
 
@@ -17,7 +17,7 @@ describe('parseStashList', () => {
       ['stash@{0}', 'WIP on main: abc Add feature', 'Ana Petrova', '2026-01-02T00:00:00Z'].join(
         FIELD,
       ),
-      ['stash@{1}', 'branchly-shelf: cleanup', 'Ana Petrova', '2026-01-01T00:00:00Z'].join(FIELD),
+      ['stash@{1}', 'On feature/foo: cleanup', 'Ana Petrova', '2026-01-01T00:00:00Z'].join(FIELD),
     ].join('\n');
     const stashes = parseStashList(raw);
     expect(stashes).toHaveLength(2);
@@ -30,12 +30,3 @@ describe('parseStashList', () => {
   });
 });
 
-describe('stashKind', () => {
-  it('tags branchly-shelf messages as shelf', () => {
-    expect(stashKind('branchly-shelf: WIP')).toBe('shelf');
-  });
-
-  it('treats everything else as a plain stash', () => {
-    expect(stashKind('WIP on main: abc123 message')).toBe('stash');
-  });
-});

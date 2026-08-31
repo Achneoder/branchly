@@ -1,5 +1,4 @@
 import type { GitService } from './gitService';
-import type { StashEntry } from '../shared/protocol';
 import { parseNumstat } from './diff';
 
 const FIELD = '\x1f';
@@ -35,14 +34,6 @@ export function parseStashList(raw: string): RawStash[] {
         date: date ?? '',
       };
     });
-}
-
-/**
- * git has one stash mechanism; JetBrains' "Shelve" vs. "Stash" distinction is a UI
- * convention only, so we infer it from Branchly's own message prefix.
- */
-export function stashKind(message: string): StashEntry['kind'] {
-  return message.startsWith('branchly-shelf:') ? 'shelf' : 'stash';
 }
 
 export async function listStashes(git: GitService, signal?: AbortSignal): Promise<RawStash[]> {

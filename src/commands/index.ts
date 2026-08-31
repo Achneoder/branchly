@@ -19,7 +19,7 @@ export function registerCommands(
     openTab('commit'),
     openTab('conflicts'),
     openTab('rebase'),
-    openTab('shelf'),
+    openTab('stash'),
     openTab('history'),
     vscode.commands.registerCommand('branchly.showBranchPopup', () => panel.openBranchPopup()),
     vscode.commands.registerCommand('branchly.toggleBlame', () => blameDecorations.toggle()),

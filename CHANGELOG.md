@@ -9,9 +9,9 @@ This project follows [Conventional Commits](https://www.conventionalcommits.org/
 ### Added
 
 - Initial extension scaffold: bottom panel tool window with Log, Commit, Conflicts, Rebase,
-  Shelf and History tabs.
+  Stash and History tabs.
 - Commit graph with lane rendering, speed search, filters, and split/unified diff.
 - Changelist-based staging and commit flow.
-- Interactive rebase editor, three-pane conflict resolver, and shelf (stash) management.
+- Interactive rebase editor, three-pane conflict resolver, and stash management.
 - File history with inline blame.
 - Branch popup and status bar integration.
