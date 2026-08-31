@@ -16,6 +16,34 @@ one bottom panel.
 - **Shelf** — stash/shelve, apply, drop, unshelve, with a preview diff.
 - **History** — per-file commit history with a full blame column, plus inline editor blame.
 
+## Installation
+
+Branchly isn't published to the VS Code Marketplace — install it from a `.vsix` release build.
+
+**One-line install** (downloads the latest release and installs it):
+
+```bash
+curl -L -o branchly.vsix https://github.com/Achneoder/branchly/releases/latest/download/branchly.vsix && code --install-extension branchly.vsix
+```
+
+PowerShell:
+
+```powershell
+Invoke-WebRequest -Uri https://github.com/Achneoder/branchly/releases/latest/download/branchly.vsix -OutFile branchly.vsix; code --install-extension branchly.vsix
+```
+
+**Manual install**
+
+1. Download `branchly.vsix` from the [latest release](https://github.com/Achneoder/branchly/releases/latest).
+2. In VS Code, open the Extensions view, click the `...` menu in the top right, and choose
+   **Install from VSIX...**, then select the downloaded file.
+   - Or from the command line: `code --install-extension /path/to/branchly.vsix`
+3. Reload the window if prompted. The Branchly panel appears in the bottom panel group.
+
+New releases are cut by pushing a `vX.Y.Z` tag, which triggers
+[`.github/workflows/release.yml`](.github/workflows/release.yml) to build and attach the `.vsix`
+to a GitHub release automatically.
+
 ## Development
 
 ```bash
