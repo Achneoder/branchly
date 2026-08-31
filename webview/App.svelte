@@ -21,7 +21,7 @@
 
 <div
   class="orb"
-  data-theme={appState.appearance.theme}
+  data-theme={appState.appearance.theme === 'auto' ? undefined : appState.appearance.theme}
   data-density={appState.appearance.density}
   data-mono={appState.appearance.monoGraph ? '1' : '0'}
 >

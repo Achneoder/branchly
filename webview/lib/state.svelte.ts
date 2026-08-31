@@ -3,7 +3,7 @@ import { onHostMessage, postToHost } from './bridge';
 
 function createAppState() {
   let appearance = $state<AppearanceState>({
-    theme: 'dark',
+    theme: 'auto',
     density: 'comfortable',
     monoGraph: false,
     diffMode: 'split',

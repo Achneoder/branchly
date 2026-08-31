@@ -4,7 +4,7 @@
 export type TabId = 'log' | 'commit' | 'conflicts' | 'rebase' | 'shelf' | 'history';
 
 export interface AppearanceState {
-  theme: 'dark' | 'light';
+  theme: 'auto' | 'dark' | 'light';
   density: 'comfortable' | 'compact';
   monoGraph: boolean;
   diffMode: 'split' | 'unified';
