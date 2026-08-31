@@ -52,7 +52,10 @@ export class PanelViewProvider implements vscode.WebviewViewProvider {
       webviewView.webview.onDidReceiveMessage((msg: WebviewToHostMessage) =>
         this.dispatch(msg, ctx),
       ),
-      this.container.repositoryManager.onDidChangeActiveRepository(() => void this.pushStatus(ctx)),
+      this.container.repositoryManager.onDidChangeActiveRepository(() => {
+        void this.pushStatus(ctx);
+        void historyHandler.pushActiveFile(ctx, vscode.window.activeTextEditor?.document.uri);
+      }),
       this.container.repositoryManager.onDidChangeRepositoryState(() => {
         void this.pushStatus(ctx);
         void commitHandler.refresh(ctx);
