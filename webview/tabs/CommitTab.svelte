@@ -50,10 +50,7 @@
         <button disabled={commitState.submitting} onclick={() => commitState.submit(true)}>
           Commit and Push…
         </button>
-        <button
-          disabled={commitState.submitting}
-          onclick={() => commitState.openStashComposer()}
-        >
+        <button disabled={commitState.submitting} onclick={() => commitState.openStashComposer()}>
           Stash Selected…
         </button>
         <div class="spacer"></div>
@@ -93,8 +90,7 @@
       <input
         placeholder="Stash message"
         value={commitState.stashMessage}
-        oninput={(e) =>
-          commitState.setStashMessage((e.currentTarget as HTMLInputElement).value)}
+        oninput={(e) => commitState.setStashMessage((e.currentTarget as HTMLInputElement).value)}
       />
       <div class="composer-actions">
         <button onclick={() => commitState.closeStashComposer()}>Cancel</button>

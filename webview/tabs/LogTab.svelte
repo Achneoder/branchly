@@ -91,7 +91,12 @@
             }}
           >
             <div class="subject-cell">
-              <svg class="graph-cell" width={graphWidth} height={rowHeight} viewBox="0 0 {graphWidth} {rowHeight}">
+              <svg
+                class="graph-cell"
+                width={graphWidth}
+                height={rowHeight}
+                viewBox="0 0 {graphWidth} {rowHeight}"
+              >
                 {#each commit.segments as seg, i (i)}
                   <path
                     d={segmentPath(seg.x1, seg.y1, seg.x2, seg.y2, rowHeight)}
