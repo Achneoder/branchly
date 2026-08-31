@@ -3,6 +3,7 @@ import type { Container } from '../core/container';
 import { AbortRegistry } from '../core/abortRegistry';
 import { readAppearance } from '../core/config';
 import type { AppearanceState, TabId, WebviewToHostMessage } from '../shared/protocol';
+import { AbortedError } from '../git/gitService';
 import type { PanelContext } from './handlers/types';
 import { getRepoStatus } from './handlers/shared';
 import * as logHandler from './handlers/log';
@@ -159,6 +160,7 @@ export class PanelViewProvider implements vscode.WebviewViewProvider {
           return await branchesHandler.handle(msg, ctx);
       }
     } catch (err) {
+      if (err instanceof AbortedError) return;
       this.container.logger.error('Failed to handle webview message', err);
       ctx.post({ type: 'error', message: err instanceof Error ? err.message : String(err) });
     }
