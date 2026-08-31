@@ -35,8 +35,9 @@ async function resolveGitDir(git: GitService): Promise<string> {
 
 async function resolveDefaultBase(git: GitService): Promise<string> {
   try {
-    await git.raw(['rev-parse', '--verify', '@{u}']);
-    return '@{u}';
+    return (
+      await git.raw(['rev-parse', '--abbrev-ref', '--symbolic-full-name', '@{u}'])
+    ).trim();
   } catch {
     return 'HEAD~10';
   }
