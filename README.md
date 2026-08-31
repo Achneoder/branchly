@@ -15,6 +15,8 @@ one bottom panel.
   a result preview.
 - **Shelf** — stash/shelve, apply, drop, unshelve, with a preview diff.
 - **History** — per-file commit history with a full blame column, plus inline editor blame.
+- **Branches** — quick-switch popup (Ctrl+Shift+` / Cmd+Shift+`) for checkout, comparing
+  branches, and creating a new branch from a ref.
 
 ## Installation
 
