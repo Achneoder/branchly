@@ -22,16 +22,19 @@ export interface GraphDot {
   fill: string;
 }
 
-export interface GraphLine {
-  x: number;
-  top: number;
-  bottom: number;
-  color: string;
-}
-
-export interface GraphLink {
-  x: number;
-  width: number;
+/**
+ * One drawable stroke within a commit row's graph cell, in row-local
+ * coordinates: `x1`/`x2` are lane-column pixel offsets, `y1`/`y2` are
+ * percentages of the row's height (0 = top, 50 = the row's own commit dot,
+ * 100 = bottom). A segment with `x1 === x2` renders as a straight line; the
+ * webview draws anything else as a bezier curve so lane changes read as
+ * smooth S-curves rather than hard right-angle jogs.
+ */
+export interface GraphSegment {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
   color: string;
 }
 
@@ -47,8 +50,7 @@ export interface CommitRow {
   refs: RefBadge[];
   isMerge: boolean;
   lane: number;
-  lines: GraphLine[];
-  links: GraphLink[];
+  segments: GraphSegment[];
   dots: GraphDot[];
 }
 

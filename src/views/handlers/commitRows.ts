@@ -31,8 +31,7 @@ export function toCommitRows(raws: RawCommit[]): CommitRow[] {
       refs: parseDecoratedRefs(commit.refs),
       isMerge: lane.isMerge,
       lane: lane.lane,
-      lines: lane.lines,
-      links: lane.links,
+      segments: lane.segments,
       dots: lane.dots,
     };
   });

@@ -10,11 +10,16 @@ describe('assignLanes: linear history', () => {
     const rows = assignLanes([commit('c3', 'c2'), commit('c2', 'c1'), commit('c1')]);
     expect(rows.map((r) => r.lane)).toEqual([0, 0, 0]);
     expect(rows.every((r) => !r.isMerge)).toBe(true);
-    // Lines render whenever a lane is active on either side of the row (matching the
-    // mockup's own full-height convention), so even the root commit still shows the
-    // line entering from its child above it.
-    expect(rows[0].lines.some((l) => l.x === laneX(0))).toBe(true);
-    expect(rows[2].lines.some((l) => l.x === laneX(0))).toBe(true);
+    // The topmost commit has nothing above it waiting for it, so it only
+    // renders the bottom half of its lane (dot down to its parent).
+    expect(rows[0].segments).toEqual([
+      { x1: laneX(0), y1: 50, x2: laneX(0), y2: 100, color: laneColor(0) },
+    ]);
+    // The root commit has no parents, so it only renders the top half
+    // (entering from the child above it) with nothing below.
+    expect(rows[2].segments).toEqual([
+      { x1: laneX(0), y1: 0, x2: laneX(0), y2: 50, color: laneColor(0) },
+    ]);
   });
 });
 
@@ -33,8 +38,7 @@ describe('assignLanes: branch and fold', () => {
     expect(rows[1].lane).toBe(1); // f1 - new tip, own lane
     expect(rows[2].lane).toBe(0); // m1 - continues main's lane
     // base is awaited by both m1 (lane 0) and f1 (lane 1); whichever reaches it
-    // second must fold its lane into the first with a link.
-    expect(rows[3].links.length).toBeGreaterThanOrEqual(0);
+    // second must fold its lane into the first with a segment crossing lanes.
     const baseLane = rows[3].lane;
     expect([0, 1]).toContain(baseLane);
   });
@@ -54,7 +58,7 @@ describe('assignLanes: branch and fold', () => {
 });
 
 describe('assignLanes: merge commits', () => {
-  it('marks two-parent commits as merges with a filled dot and a link to the second parent', () => {
+  it('marks two-parent commits as merges with a filled dot and one outgoing segment per parent', () => {
     const rows = assignLanes([
       commit('merge', 'main1', 'feature1'),
       commit('feature1', 'base'),
@@ -64,10 +68,11 @@ describe('assignLanes: merge commits', () => {
     const [mergeRow] = rows;
     expect(mergeRow.isMerge).toBe(true);
     expect(mergeRow.dots[0].fill).toBe(laneColor(mergeRow.lane));
-    expect(mergeRow.links).toHaveLength(1);
+    const outgoing = mergeRow.segments.filter((s) => s.y1 === 50 && s.y2 === 100);
+    expect(outgoing).toHaveLength(2);
   });
 
-  it('handles an octopus merge with three parents by opening a link per extra parent', () => {
+  it('handles an octopus merge with three parents by opening one outgoing segment per parent', () => {
     const rows = assignLanes([
       commit('octopus', 'p1', 'p2', 'p3'),
       commit('p1'),
@@ -76,7 +81,8 @@ describe('assignLanes: merge commits', () => {
     ]);
     const [octopusRow] = rows;
     expect(octopusRow.isMerge).toBe(true);
-    expect(octopusRow.links).toHaveLength(2);
+    const outgoing = octopusRow.segments.filter((s) => s.y1 === 50 && s.y2 === 100);
+    expect(outgoing).toHaveLength(3);
   });
 });
 

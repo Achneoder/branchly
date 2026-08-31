@@ -17,10 +17,18 @@
     let max = 40;
     for (const row of logState.rows) {
       for (const d of row.dots) max = Math.max(max, d.x);
-      for (const l of row.lines) max = Math.max(max, l.x);
+      for (const s of row.segments) max = Math.max(max, s.x1, s.x2);
     }
     return Math.max(56, max + 20);
   });
+
+  function segmentPath(x1: number, y1: number, x2: number, y2: number, rowHeight: number): string {
+    const py1 = (y1 / 100) * rowHeight;
+    const py2 = (y2 / 100) * rowHeight;
+    if (x1 === x2) return `M${x1},${py1} L${x2},${py2}`;
+    const midY = (py1 + py2) / 2;
+    return `M${x1},${py1} C${x1},${midY} ${x2},${midY} ${x2},${py2}`;
+  }
 
   function statusColor(status: string): string {
     if (status === 'A') return 'var(--a2)';
@@ -83,26 +91,25 @@
             }}
           >
             <div class="subject-cell">
-              <div class="graph-cell" style="width:{graphWidth}px;height:{rowHeight}px">
-                {#each commit.lines as line, i (i)}
-                  <div
-                    class="graph-line"
-                    style="left:{line.x}px;top:{line.top}%;bottom:{line.bottom}%;background:{line.color}"
-                  ></div>
-                {/each}
-                {#each commit.links as link, i (i)}
-                  <div
-                    class="graph-link"
-                    style="left:{link.x}px;width:{link.width}px;background:{link.color}"
-                  ></div>
+              <svg class="graph-cell" width={graphWidth} height={rowHeight} viewBox="0 0 {graphWidth} {rowHeight}">
+                {#each commit.segments as seg, i (i)}
+                  <path
+                    d={segmentPath(seg.x1, seg.y1, seg.x2, seg.y2, rowHeight)}
+                    stroke={seg.color}
+                    class="graph-segment"
+                  />
                 {/each}
                 {#each commit.dots as dot, i (i)}
-                  <div
+                  <circle
                     class="graph-dot"
-                    style="left:{dot.x}px;border-color:{dot.color};background:{dot.fill}"
-                  ></div>
+                    cx={dot.x}
+                    cy={rowHeight / 2}
+                    r="4.5"
+                    stroke={dot.color}
+                    fill={dot.fill}
+                  />
                 {/each}
-              </div>
+              </svg>
               {#each commit.refs as ref (ref.name)}
                 <span
                   class="ref-badge"
@@ -281,29 +288,17 @@
     gap: 8px;
   }
   .graph-cell {
-    position: relative;
     flex: none;
+    overflow: visible;
   }
-  .graph-line {
-    position: absolute;
-    width: 2px;
+  .graph-segment {
+    fill: none;
+    stroke-width: 2px;
     opacity: 0.85;
-  }
-  .graph-link {
-    position: absolute;
-    top: 50%;
-    height: 2px;
-    opacity: 0.85;
+    stroke-linecap: round;
   }
   .graph-dot {
-    position: absolute;
-    top: 50%;
-    width: 9px;
-    height: 9px;
-    margin: -5px 0 0 -4.5px;
-    border-radius: 50%;
-    border: 2px solid;
-    box-sizing: border-box;
+    stroke-width: 2px;
   }
   .ref-badge {
     flex: none;

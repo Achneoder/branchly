@@ -1,4 +1,4 @@
-import type { GraphDot, GraphLine, GraphLink } from '../shared/protocol';
+import type { GraphDot, GraphSegment } from '../shared/protocol';
 
 export interface LaneInput {
   hash: string;
@@ -8,8 +8,7 @@ export interface LaneInput {
 export interface LaneResult {
   lane: number;
   isMerge: boolean;
-  lines: GraphLine[];
-  links: GraphLink[];
+  segments: GraphSegment[];
   dots: GraphDot[];
 }
 
@@ -26,19 +25,20 @@ export function laneX(lane: number): number {
 }
 
 /**
- * Assigns each commit a lane and computes the vertical/horizontal segments
- * needed to render a `git log --graph`-style column, one row per input
- * commit (input order must match git log's default: children before their
- * parents).
+ * Assigns each commit a lane and computes the graph segments needed to
+ * render a `git log --graph`-style column, one row per input commit (input
+ * order must match git log's default: children before their parents).
  *
  * Model: `activeLanes[i]` holds the commit hash a lane is waiting to reach
  * next (or null once free). A commit occupies the lane already waiting for
- * its hash, or a newly freed one if it's an unseen branch tip. Its first
- * parent continues straight down in the same lane unless that parent is
- * already awaited elsewhere, in which case this lane folds into the
- * existing one (a link is drawn) and is freed for reuse. Additional
- * (merge) parents either fold into an already-tracked lane or spawn a new
- * one, each producing a link from the merge commit's lane.
+ * its hash, or a newly freed one if it's an unseen branch tip. Each row is
+ * split at its own commit dot (the row's vertical center): a top-half
+ * segment carries the lane down from the row above into the dot (only when
+ * something above was actually waiting for this commit), and one bottom-half
+ * segment per parent carries the dot out to whichever lane that parent lands
+ * in — the same lane if it just continues, a fold into an already-tracked
+ * lane, or a freshly allocated one. Any other lane still waiting on a hash
+ * passes through the row untouched as a full-height segment.
  */
 export function assignLanes(commits: LaneInput[]): LaneResult[] {
   const activeLanes: Array<string | null> = [];
@@ -52,49 +52,50 @@ export function assignLanes(commits: LaneInput[]): LaneResult[] {
 
   return commits.map((commit) => {
     let lane = activeLanes.indexOf(commit.hash);
-    if (lane === -1) lane = allocateFreeLane();
+    const hasIncoming = lane !== -1;
+    if (!hasIncoming) lane = allocateFreeLane();
 
     const beforeLanes = activeLanes.slice();
     activeLanes[lane] = null;
 
     const isMerge = commit.parents.length > 1;
-    const links: Array<{ from: number; to: number }> = [];
+    const segments: GraphSegment[] = [];
+
+    if (hasIncoming) {
+      segments.push({ x1: laneX(lane), y1: 0, x2: laneX(lane), y2: 50, color: laneColor(lane) });
+    }
 
     commit.parents.forEach((parentHash, idx) => {
       const existing = activeLanes.indexOf(parentHash);
-      if (idx === 0) {
-        if (existing !== -1) {
-          links.push({ from: lane, to: existing });
-        } else {
-          activeLanes[lane] = parentHash;
-        }
+      let targetLane: number;
+      if (idx === 0 && existing === -1) {
+        activeLanes[lane] = parentHash;
+        targetLane = lane;
       } else if (existing !== -1) {
-        links.push({ from: lane, to: existing });
+        targetLane = existing;
       } else {
-        const newLane = allocateFreeLane();
-        activeLanes[newLane] = parentHash;
-        links.push({ from: lane, to: newLane });
+        targetLane = allocateFreeLane();
+        activeLanes[targetLane] = parentHash;
       }
+      segments.push({
+        x1: laneX(lane),
+        y1: 50,
+        x2: laneX(targetLane),
+        y2: 100,
+        color: laneColor(targetLane),
+      });
     });
 
-    const activeIndices = new Set<number>();
-    beforeLanes.forEach((v, i) => v !== null && activeIndices.add(i));
-    activeLanes.forEach((v, i) => v !== null && activeIndices.add(i));
-
-    const lines: GraphLine[] = [...activeIndices]
-      .sort((a, b) => a - b)
-      .map((i) => ({ x: laneX(i), top: 0, bottom: 0, color: laneColor(i) }));
-
-    const graphLinks: GraphLink[] = links.map(({ from, to }) => ({
-      x: Math.min(laneX(from), laneX(to)),
-      width: Math.abs(laneX(to) - laneX(from)),
-      color: laneColor(to),
-    }));
+    beforeLanes.forEach((hash, i) => {
+      if (hash !== null && i !== lane) {
+        segments.push({ x1: laneX(i), y1: 0, x2: laneX(i), y2: 100, color: laneColor(i) });
+      }
+    });
 
     const dots: GraphDot[] = [
       { x: laneX(lane), color: laneColor(lane), fill: isMerge ? laneColor(lane) : 'var(--panel)' },
     ];
 
-    return { lane, isMerge, lines, links: graphLinks, dots };
+    return { lane, isMerge, segments, dots };
   });
 }
