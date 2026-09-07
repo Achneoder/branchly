@@ -21,6 +21,7 @@ export function registerCommands(
     openTab('rebase'),
     openTab('stash'),
     openTab('history'),
+    openTab('branches'),
     vscode.commands.registerCommand('branchly.showBranchPopup', () => panel.openBranchPopup()),
     vscode.commands.registerCommand('branchly.toggleBlame', () => blameDecorations.toggle()),
   );

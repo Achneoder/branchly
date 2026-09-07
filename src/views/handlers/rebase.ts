@@ -10,7 +10,7 @@ import {
 } from '../../git/rebase';
 import type { RebaseTodoItem, WebviewToHostMessage } from '../../shared/protocol';
 import type { PanelContext } from './types';
-import { refreshAfterMutation } from './shared';
+import { describeError, refreshAfterMutation } from './shared';
 
 interface RebasePanelState {
   base: string;
@@ -93,10 +93,6 @@ export async function refresh(ctx: PanelContext): Promise<void> {
   if (!git) return;
   const gitDir = await resolveGitDir(git);
   ctx.post({ type: 'rebase:status', status: getRebaseStatus(gitDir) });
-}
-
-function describeError(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
 }
 
 export async function handle(msg: WebviewToHostMessage, ctx: PanelContext): Promise<void> {

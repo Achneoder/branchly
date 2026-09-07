@@ -28,14 +28,21 @@ export function parseDecoratedRefs(refs: string[]): RefBadge[] {
   return result;
 }
 
+const REF_FORMAT = [
+  '%(refname)',
+  '%(HEAD)',
+  '%(upstream:short)',
+  '%(upstream:remotename)',
+  '%(upstream:track)',
+  '%(objectname)',
+  '%(objectname:short)',
+  '%(subject)',
+  '%(authorname)',
+  '%(committerdate:iso-strict)',
+].join(FIELD);
+
 export function buildForEachRefArgs(): string[] {
-  return [
-    'for-each-ref',
-    `--format=%(refname)${FIELD}%(HEAD)${FIELD}%(upstream:track)${FIELD}%(committerdate:iso-strict)`,
-    'refs/heads',
-    'refs/remotes',
-    'refs/tags',
-  ];
+  return ['for-each-ref', `--format=${REF_FORMAT}`, 'refs/heads', 'refs/remotes', 'refs/tags'];
 }
 
 export function parseForEachRef(raw: string): BranchItem[] {
@@ -44,7 +51,8 @@ export function parseForEachRef(raw: string): BranchItem[] {
     .map((l) => l.trim())
     .filter(Boolean)
     .map((line) => {
-      const [refname, head, track, date] = line.split(FIELD);
+      const [refname, head, upstream, upstreamRemote, track, hash, abbrev, subject, author, date] =
+        line.split(FIELD);
       const ahead = /ahead (\d+)/.exec(track ?? '');
       const behind = /behind (\d+)/.exec(track ?? '');
 
@@ -67,17 +75,90 @@ export function parseForEachRef(raw: string): BranchItem[] {
         isCurrent: head === '*',
         ahead: ahead ? Number(ahead[1]) : undefined,
         behind: behind ? Number(behind[1]) : undefined,
+        upstream: kind === 'local' && upstream ? upstream : undefined,
+        remoteName:
+          kind === 'local' && upstreamRemote
+            ? upstreamRemote
+            : kind === 'remote'
+              ? name.slice(0, name.indexOf('/'))
+              : undefined,
+        lastCommitHash: hash || undefined,
+        lastCommitAbbrev: abbrev || undefined,
+        lastCommitSubject: subject || undefined,
+        lastCommitAuthor: author || undefined,
         lastCommitDate: date,
       };
     });
 }
 
+export function parseMergedRefNames(raw: string): Set<string> {
+  return new Set(
+    raw
+      .split('\n')
+      .map((l) => l.trim())
+      .filter(Boolean),
+  );
+}
+
+export async function getMergedRefs(
+  git: GitService,
+  into = 'HEAD',
+  signal?: AbortSignal,
+): Promise<Set<string>> {
+  const raw = await git.raw(
+    ['for-each-ref', `--merged=${into}`, '--format=%(refname)', 'refs/heads', 'refs/remotes'],
+    signal,
+  );
+  return parseMergedRefNames(raw);
+}
+
+function refnameFor(item: Pick<BranchItem, 'kind' | 'name'>): string {
+  switch (item.kind) {
+    case 'local':
+      return `refs/heads/${item.name}`;
+    case 'remote':
+      return `refs/remotes/${item.name}`;
+    case 'tag':
+      return `refs/tags/${item.name}`;
+  }
+}
+
 export async function listBranches(git: GitService, signal?: AbortSignal): Promise<BranchItem[]> {
-  const raw = await git.raw(buildForEachRefArgs(), signal);
-  return parseForEachRef(raw);
+  const [raw, merged] = await Promise.all([
+    git.raw(buildForEachRefArgs(), signal),
+    getMergedRefs(git, 'HEAD', signal),
+  ]);
+  return parseForEachRef(raw).map((item) => ({
+    ...item,
+    merged: item.kind === 'tag' ? undefined : merged.has(refnameFor(item)),
+  }));
 }
 
 export async function getCurrentBranch(git: GitService, signal?: AbortSignal): Promise<string> {
   const raw = await git.raw(['rev-parse', '--abbrev-ref', 'HEAD'], signal);
   return raw.trim();
+}
+
+export async function deleteLocalBranch(
+  git: GitService,
+  name: string,
+  force: boolean,
+): Promise<void> {
+  await git.raw(['branch', force ? '-D' : '-d', name]);
+}
+
+export async function deleteRemoteBranch(
+  git: GitService,
+  remote: string,
+  name: string,
+): Promise<void> {
+  await git.raw(['push', remote, '--delete', name]);
+}
+
+export async function listRemoteNames(git: GitService, signal?: AbortSignal): Promise<string[]> {
+  const raw = await git.raw(['remote'], signal);
+  return raw
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean);
 }

@@ -40,7 +40,7 @@
     if (e.key !== 'Enter') return;
     if (e.metaKey || e.ctrlKey) branchesState.newFrom(item.name);
     else if (e.altKey) branchesState.compare(item.name);
-    else branchesState.checkout(item.name);
+    else branchesState.checkout(item.name, item.kind);
     appState.closeBranchPopup();
   }
 </script>
@@ -65,7 +65,7 @@
           tabindex="0"
           onkeydown={(e) => onKeydown(e, item)}
           ondblclick={() => {
-            branchesState.checkout(item.name);
+            branchesState.checkout(item.name, item.kind);
             appState.closeBranchPopup();
           }}
         >

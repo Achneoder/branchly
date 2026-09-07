@@ -25,8 +25,8 @@ function createBranchesState() {
     setQuery(value: string) {
       query = value;
     },
-    checkout(name: string) {
-      postToHost({ type: 'branches:checkout', name });
+    checkout(name: string, kind: BranchItem['kind']) {
+      postToHost({ type: 'branches:checkout', name, kind });
     },
     compare(name: string) {
       postToHost({ type: 'branches:compare', name });

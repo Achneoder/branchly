@@ -1,7 +1,7 @@
 // Message contract between the extension host and the webview panel.
 // Both sides import this file so the payloads stay compile-checked in lockstep.
 
-export type TabId = 'log' | 'commit' | 'conflicts' | 'rebase' | 'stash' | 'history';
+export type TabId = 'log' | 'commit' | 'conflicts' | 'rebase' | 'stash' | 'history' | 'branches';
 
 export interface AppearanceState {
   theme: 'auto' | 'dark' | 'light';
@@ -143,7 +143,22 @@ export interface BranchItem {
   isCurrent: boolean;
   ahead?: number;
   behind?: number;
+  upstream?: string;
+  remoteName?: string;
+  lastCommitHash?: string;
+  lastCommitAbbrev?: string;
+  lastCommitSubject?: string;
+  lastCommitAuthor?: string;
   lastCommitDate?: string;
+  merged?: boolean;
+}
+
+export interface BranchCommitSummary {
+  hash: string;
+  abbrev: string;
+  subject: string;
+  author: string;
+  date: string;
 }
 
 export interface BlameLine {
@@ -194,6 +209,7 @@ export type HostToWebviewMessage =
   | { type: 'rebase:todo'; items: RebaseTodoItem[]; base: string }
   | { type: 'rebase:preview'; items: { text: string; color: string }[] }
   | { type: 'branches:list'; branches: BranchItem[] }
+  | { type: 'branches:detail'; ref: string; commits: BranchCommitSummary[] }
   | { type: 'branches:open' }
   | { type: 'menu:open'; x: number; y: number; items: ContextMenuItem[]; contextHash: string }
   | { type: 'error'; message: string };
@@ -237,6 +253,17 @@ export type WebviewToHostMessage =
   | { type: 'rebase:abort' }
   | { type: 'rebase:skip' }
   | { type: 'branches:request' }
-  | { type: 'branches:checkout'; name: string }
+  | { type: 'branches:select'; name: string; kind: BranchItem['kind'] }
+  | { type: 'branches:checkout'; name: string; kind: BranchItem['kind'] }
   | { type: 'branches:compare'; name: string }
-  | { type: 'branches:newFrom'; base: string };
+  | { type: 'branches:newFrom'; base: string }
+  | { type: 'branches:delete'; name: string; kind: 'local' | 'remote' }
+  | { type: 'branches:rename'; name: string }
+  | { type: 'branches:merge'; name: string }
+  | { type: 'branches:rebaseOnto'; name: string }
+  | { type: 'branches:push'; name: string }
+  | { type: 'branches:pull' }
+  | { type: 'branches:fetchAll' }
+  | { type: 'branches:setUpstream'; name: string }
+  | { type: 'branches:contextMenu'; ref: string; x: number; y: number }
+  | { type: 'branches:contextAction'; ref: string; action: string };

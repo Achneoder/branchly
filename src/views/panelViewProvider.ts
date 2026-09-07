@@ -62,6 +62,7 @@ export class PanelViewProvider implements vscode.WebviewViewProvider {
         void stashHandler.refresh(ctx);
         void conflictsHandler.refresh(ctx);
         void rebaseHandler.refresh(ctx);
+        void branchesHandler.refresh(ctx);
       }),
       vscode.window.onDidChangeActiveColorTheme(() => this.pushAppearance(ctx)),
       vscode.workspace.onDidChangeConfiguration((e) => {

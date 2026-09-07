@@ -7,6 +7,7 @@
   import RebaseTab from './tabs/RebaseTab.svelte';
   import StashTab from './tabs/StashTab.svelte';
   import HistoryTab from './tabs/HistoryTab.svelte';
+  import BranchesTab from './tabs/BranchesTab.svelte';
   import BranchPopup from './lib/BranchPopup.svelte';
 
   const TABS: { id: TabId; label: string }[] = [
@@ -16,6 +17,7 @@
     { id: 'rebase', label: 'Rebase' },
     { id: 'stash', label: 'Stash' },
     { id: 'history', label: 'History' },
+    { id: 'branches', label: 'Branches' },
   ];
 </script>
 
@@ -85,6 +87,8 @@
       <StashTab />
     {:else if appState.tab === 'history'}
       <HistoryTab />
+    {:else if appState.tab === 'branches'}
+      <BranchesTab />
     {/if}
   </div>
 

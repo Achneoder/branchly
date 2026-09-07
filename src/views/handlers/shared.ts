@@ -27,3 +27,7 @@ export async function getRepoStatus(ctx: PanelContext): Promise<RepoStatusSummar
 export async function refreshAfterMutation(ctx: PanelContext): Promise<void> {
   ctx.post({ type: 'status', status: await getRepoStatus(ctx) });
 }
+
+export function describeError(err: unknown): string {
+  return err instanceof Error ? err.message : String(err);
+}

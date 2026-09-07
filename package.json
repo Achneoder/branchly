@@ -90,6 +90,11 @@
         "category": "Branchly"
       },
       {
+        "command": "branchly.openBranches",
+        "title": "Show Branches Tab",
+        "category": "Branchly"
+      },
+      {
         "command": "branchly.toggleBlame",
         "title": "Toggle Editor Blame",
         "category": "Branchly"
