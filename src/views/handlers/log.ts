@@ -9,6 +9,7 @@ import {
 } from '../../git/diff';
 import { getLogPageSize } from '../../core/config';
 import { encodeGitUri } from '../../editor/contentProvider';
+import { createTag, getTagsAt, pushTag } from '../../git/refs';
 import type {
   CommitDetail,
   ContextMenuItem,
@@ -16,7 +17,7 @@ import type {
   WebviewToHostMessage,
 } from '../../shared/protocol';
 import type { PanelContext } from './types';
-import { refreshAfterMutation } from './shared';
+import { describeError, pickRemoteName, refreshAfterMutation } from './shared';
 import { formatDate, toCommitRows } from './commitRows';
 
 interface ParsedFilters {
@@ -43,8 +44,8 @@ function parseFilters(filters: string[]): ParsedFilters {
   return result;
 }
 
-function buildContextMenu(): ContextMenuItem[] {
-  return [
+function buildContextMenu(tags: string[]): ContextMenuItem[] {
+  const items: ContextMenuItem[] = [
     { id: 'checkoutRevision', label: 'Checkout Revision' },
     { id: 'compareWithLocal', label: 'Compare with Local', keybinding: '⌘D' },
     { id: 'showDiffWithWorkingTree', label: 'Show Diff with Working Tree' },
@@ -55,7 +56,15 @@ function buildContextMenu(): ContextMenuItem[] {
     { id: 'sep2', label: '', separator: true },
     { id: 'copyRevisionNumber', label: 'Copy Revision Number', keybinding: '⌘C' },
     { id: 'newBranchFrom', label: 'New Branch from Here…' },
+    { id: 'createTag', label: 'Tag This Commit…' },
   ];
+  if (tags.length > 0) {
+    items.push({
+      id: 'pushTag',
+      label: tags.length === 1 ? `Push Tag '${tags[0]}'…` : 'Push Tag…',
+    });
+  }
+  return items;
 }
 
 async function openDiffWithWorkingTree(ctx: PanelContext, hash: string): Promise<void> {
@@ -112,6 +121,43 @@ async function runContextAction(hash: string, action: string, ctx: PanelContext)
       if (!name) return;
       await git.raw(['checkout', '-b', name.trim(), hash]);
       break;
+    }
+    case 'createTag': {
+      const name = await vscode.window.showInputBox({
+        prompt: `Tag name for ${hash.slice(0, 7)}`,
+        validateInput: (v) => (v.trim() ? undefined : 'Tag name is required'),
+      });
+      if (!name) return;
+      const message = await vscode.window.showInputBox({
+        prompt: 'Tag message (optional, leave empty for a lightweight tag)',
+      });
+      try {
+        await createTag(git, name.trim(), hash, message?.trim() || undefined);
+      } catch (err) {
+        ctx.post({ type: 'error', message: describeError(err) });
+        return;
+      }
+      break;
+    }
+    case 'pushTag': {
+      const tags = await getTagsAt(git, hash);
+      if (tags.length === 0) {
+        void vscode.window.showInformationMessage('This commit has no tags to push.');
+        return;
+      }
+      const tag =
+        tags.length === 1
+          ? tags[0]
+          : await vscode.window.showQuickPick(tags, { placeHolder: 'Select tag to push' });
+      if (!tag) return;
+      const remote = await pickRemoteName(git);
+      if (!remote) return;
+      try {
+        await pushTag(git, remote, tag);
+      } catch (err) {
+        ctx.post({ type: 'error', message: describeError(err) });
+      }
+      return;
     }
     default:
       return;
@@ -183,12 +229,13 @@ export async function handle(msg: WebviewToHostMessage, ctx: PanelContext): Prom
       return;
     }
     case 'log:contextMenu': {
+      const tags = await getTagsAt(git, msg.hash);
       ctx.post({
         type: 'menu:open',
         x: msg.x,
         y: msg.y,
         contextHash: msg.hash,
-        items: buildContextMenu(),
+        items: buildContextMenu(tags),
       });
       return;
     }

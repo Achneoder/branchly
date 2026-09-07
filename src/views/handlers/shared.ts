@@ -1,4 +1,7 @@
+import * as vscode from 'vscode';
 import { getStatusSummary } from '../../git/status';
+import { listRemoteNames } from '../../git/refs';
+import type { GitService } from '../../git/gitService';
 import type { RepoStatusSummary } from '../../shared/protocol';
 import type { PanelContext } from './types';
 
@@ -30,4 +33,14 @@ export async function refreshAfterMutation(ctx: PanelContext): Promise<void> {
 
 export function describeError(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
+}
+
+export async function pickRemoteName(git: GitService): Promise<string | undefined> {
+  const remotes = await listRemoteNames(git);
+  if (remotes.length === 0) {
+    void vscode.window.showErrorMessage('No remotes configured for this repository.');
+    return undefined;
+  }
+  if (remotes.length === 1) return remotes[0];
+  return vscode.window.showQuickPick(remotes, { placeHolder: 'Select a remote' });
 }

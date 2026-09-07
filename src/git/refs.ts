@@ -162,3 +162,28 @@ export async function listRemoteNames(git: GitService, signal?: AbortSignal): Pr
     .map((l) => l.trim())
     .filter(Boolean);
 }
+
+export async function getTagsAt(
+  git: GitService,
+  hash: string,
+  signal?: AbortSignal,
+): Promise<string[]> {
+  const raw = await git.raw(['tag', '--points-at', hash], signal);
+  return raw
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean);
+}
+
+export async function createTag(
+  git: GitService,
+  name: string,
+  hash: string,
+  message?: string,
+): Promise<void> {
+  await git.raw(message ? ['tag', '-a', name, '-m', message, hash] : ['tag', name, hash]);
+}
+
+export async function pushTag(git: GitService, remote: string, name: string): Promise<void> {
+  await git.raw(['push', remote, `refs/tags/${name}`]);
+}
