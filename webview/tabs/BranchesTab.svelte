@@ -2,6 +2,32 @@
   import type { BranchItem } from '@shared/protocol';
   import { branchesTabState } from './branchesTabState.svelte';
   import ContextMenu from '../lib/ContextMenu.svelte';
+  import PaneResizer from '../lib/PaneResizer.svelte';
+  import { getViewState, setViewState } from '../lib/bridge';
+
+  const DEFAULT_LIST_WIDTH = 300;
+  const MIN_LIST_WIDTH = 160;
+  const MIN_DETAIL_WIDTH = 240;
+
+  const storedWidth = getViewState('branches.listWidth', DEFAULT_LIST_WIDTH);
+  let listWidth = $state(
+    typeof storedWidth === 'number' && Number.isFinite(storedWidth)
+      ? Math.max(MIN_LIST_WIDTH, storedWidth)
+      : DEFAULT_LIST_WIDTH,
+  );
+  let tabWidth = $state(0);
+  const maxListWidth = $derived(
+    tabWidth > 0 ? Math.max(MIN_LIST_WIDTH, tabWidth - MIN_DETAIL_WIDTH) : 640,
+  );
+
+  function setListWidth(width: number) {
+    listWidth = width;
+    setViewState('branches.listWidth', width);
+  }
+
+  $effect(() => {
+    if (listWidth > maxListWidth) setListWidth(maxListWidth);
+  });
 
   interface RemoteGroup {
     remoteName: string;
@@ -53,8 +79,8 @@
   }
 </script>
 
-<div class="branches-tab">
-  <div class="list-col">
+<div class="branches-tab" bind:clientWidth={tabWidth}>
+  <div class="list-col" style="width:{listWidth}px">
     <div class="list-header">
       <span>Branches</span>
       <div class="spacer"></div>
@@ -80,7 +106,7 @@
             }}
           >
             <div class="dot" style="background:{dotColor(item)}"></div>
-            <span class="name" class:current={item.isCurrent}>{item.name}</span>
+            <span class="name" class:current={item.isCurrent} title={item.name}>{item.name}</span>
             {#if item.merged && !item.isCurrent}
               <span class="merged" title="Merged into current branch">✓</span>
             {/if}
@@ -108,7 +134,7 @@
             }}
           >
             <div class="dot" style="background:{dotColor(item)}"></div>
-            <span class="name">{item.name}</span>
+            <span class="name" title={item.name}>{item.name}</span>
             <div class="spacer"></div>
             <span class="meta">{meta(item)}</span>
           </div>
@@ -133,7 +159,7 @@
             }}
           >
             <div class="dot" style="background:{dotColor(item)}"></div>
-            <span class="name">{item.name}</span>
+            <span class="name" title={item.name}>{item.name}</span>
             <div class="spacer"></div>
             <span class="meta">{meta(item)}</span>
           </div>
@@ -144,6 +170,15 @@
       {/if}
     </div>
   </div>
+
+  <PaneResizer
+    width={listWidth}
+    min={MIN_LIST_WIDTH}
+    max={maxListWidth}
+    defaultWidth={DEFAULT_LIST_WIDTH}
+    onResize={setListWidth}
+    label="Resize branch list"
+  />
 
   <div class="detail-col">
     {#if selected}
@@ -266,7 +301,7 @@
 
   .list-col {
     flex: none;
-    width: 300px;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     border-right: 1px solid var(--border);
