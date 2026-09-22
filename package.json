@@ -2,7 +2,7 @@
   "name": "branchly",
   "displayName": "Branchly",
   "description": "JetBrains-grade Git tooling for VS Code: commit graph, changelists, interactive rebase, conflict resolver, stash and blame.",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "publisher": "achneoder",
   "license": "MIT",
   "private": true,
